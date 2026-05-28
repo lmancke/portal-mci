@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Herramientas — Momentum Capital Investment</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --green: #93D741;
+    --green-dark: #78b832;
+    --green-glow: rgba(147,215,65,0.15);
+    --black: #000000;
+    --surface: #0d0d0d;
+    --surface-2: #161616;
+    --surface-3: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(147,215,65,0.4);
+    --text: #ffffff;
+    --text-muted: rgba(255,255,255,0.5);
+    --text-dim: rgba(255,255,255,0.3);
+  }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 36px;
+  }
+
+  .candle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .wick { width: 1.5px; background: currentColor; }
+  .body { width: 7px; border-radius: 1px; }
+
+  .c1 { color: rgba(255,255,255,0.7); }
+  .c2 { color: rgba(255,255,255,0.55); }
+  .c3 { color: rgba(255,255,255,0.8); }
+  .c4 { color: var(--green); }
+
+  .logo-text { line-height: 1.1; }
+  .logo-text .name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: #fff;
+  }
+  .logo-text .sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--green);
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .dot-live {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ── HERO ────────────────────────────────────────────── */
+  .hero {
+    padding: 64px 48px 40px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(147,215,65,0.04) 0%, transparent 100%);
+  }
+
+  .hero-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 14px;
+  }
+
+  .hero h1 {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 span { color: var(--green); }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+  }
+
+  .stat { }
+  .stat .val {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.5px;
+    display: block;
+  }
+  .stat .lbl {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── FILTERS ─────────────────────────────────────────── */
+  .filters {
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filter-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    letter-spacing: 0.2px;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .filter-btn.active {
+    background: var(--green);
+    color: #000;
+    border-color: var(--green);
+  }
+
+  .filter-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin: 0 4px;
+  }
+
+  /* ── SEARCH ──────────────────────────────────────────── */
+  .search-wrap {
+    margin-left: auto;
+    position: relative;
+  }
+
+  .search-wrap input {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 14px 7px 36px;
+    color: #fff;
+    font-size: 13px;
+    font-family: inherit;
+    width: 220px;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  .search-wrap input::placeholder { color: var(--text-dim); }
+  .search-wrap input:focus { border-color: var(--green); }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  /* ── GRID ────────────────────────────────────────────── */
+  .grid-section {
+    padding: 40px 48px 80px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── CARD ────────────────────────────────────────────── */
+  .card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--green-glow);
+    border: 1px solid rgba(147,215,65,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 18px;
+    color: var(--green);
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+
+  .card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    letter-spacing: -0.2px;
+  }
+
+  .card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    flex: 1;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .card-arrow {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+
+  .card:hover .card-arrow {
+    transform: translate(2px, -2px);
+  }
+
+  /* ── CARD STATUS BADGE ───────────────────────────────── */
+  .status-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .status-live {
+    background: rgba(147,215,65,0.12);
+    color: var(--green);
+    border: 1px solid rgba(147,215,65,0.3);
+  }
+
+  .status-soon {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  /* ── COMING SOON CARD ────────────────────────────────── */
+  .card-disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .card-disabled:hover {
+    transform: none;
+    border-color: var(--border);
+  }
+
+  /* ── FOOTER ──────────────────────────────────────────── */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 28px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-brand {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .footer-brand span { color: var(--green); }
+
+  .footer-legal {
+    font-size: 11px;
+    color: var(--text-dim);
+    max-width: 500px;
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* ── COMING SOON SECTION ─────────────────────────────── */
+  .coming-soon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .mini-card {
+    background: var(--surface-2);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    opacity: 0.5;
+  }
+
+  .mini-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .mini-info .title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+  }
+
+  .mini-info .desc {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo-block" href="#">
+    <div class="logo-icon">
+      <!-- Candlestick 1 -->
+      <div class="candle c1" style="gap:0">
+        <div class="wick" style="height:5px;background:currentColor;width:1.5px;margin:0 auto"></div>
+        <div class="body" style="height:16px;background:currentColor;border:1px solid currentColor;border-radius:1px"></div>
+        <div class="wick" style="height:4px;background:currentColor;width:1.5px;margin:0 auto"></div>
+      </div>
+      <!-- Candlestick 2 -->
+      <div class="candle c2" style="gap:0">
+        <div class="wick" style="height:7px;background:currentColor;width:1.5px;margin:0 auto"></div>
+        <div class="body" style="height:10px;background:transparent;border:1.5px solid currentColor;border-radius:1px;width:7px"></div>
+        <div class="wick" style="height:3px;background:currentColor;width:1.5px;margin:0 auto"></div>
+      </div>
+      <!-- Candlestick 3 -->
+      <div class="candle c3" style="gap:0">
+        <div class="wick" style="height:4px;background:currentColor;width:1.5px;margin:0 auto"></div>
+        <div class="body" style="height:22px;background:currentColor;border-radius:1px;width:7px"></div>
+        <div class="wick" style="height:6px;background:currentColor;width:1.5px;margin:0 auto"></div>
+      </div>
+      <!-- Candlestick 4 (green) -->
+      <div class="candle c4" style="gap:0">
+        <div class="wick" style="height:6px;background:currentColor;width:1.5px;margin:0 auto"></div>
+        <div class="body" style="height:28px;background:currentColor;border-radius:1px;width:7px"></div>
+        <div class="wick" style="height:4px;background:currentColor;width:1.5px;margin:0 auto"></div>
+      </div>
+    </div>
+    <div class="logo-text">
+      <div class="name">Momentum</div>
+      <div class="sub">Capital Investment</div>
+    </div>
+  </a>
+
+  <div class="header-right">
+    <div class="badge-live">
+      <div class="dot-live"></div>
+      Portal Activo
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">Plataforma de Herramientas</div>
+  <h1>Centro de <span>Análisis</span><br>& Decisión</h1>
+  <p>Acceso centralizado a todas las herramientas de análisis financiero, comparación de instrumentos y modelos de inversión de Momentum Capital Investment.</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="val" id="tool-count">1</span>
+      <span class="lbl">Herramienta activa</span>
+    </div>
+    <div class="stat">
+      <span class="val">+4</span>
+      <span class="lbl">En desarrollo</span>
+    </div>
+    <div class="stat">
+      <span class="val">2026</span>
+      <span class="lbl">Actualización continua</span>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <button class="filter-btn active" onclick="filterCards('all', this)">Todas</button>
+  <button class="filter-btn" onclick="filterCards('financiamiento', this)">Financiamiento</button>
+  <button class="filter-btn" onclick="filterCards('mercados', this)">Mercados</button>
+  <button class="filter-btn" onclick="filterCards('portfolio', this)">Portfolio</button>
+  <div class="filter-divider"></div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" placeholder="Buscar herramienta..." oninput="searchCards(this.value)" />
+  </div>
+</div>
+
+<!-- GRID PRINCIPAL -->
+<div class="grid-section">
+  <div class="section-title">Herramientas disponibles</div>
+
+  <div class="cards-grid" id="cards-grid">
+
+    <!-- CARD 1: Comparador de Financiamiento -->
+    <a class="card" href="comparador-financiamiento-mci-v3.html" target="_blank"
+       data-category="financiamiento"
+       data-name="comparador financiamiento préstamos cuotas crédito">
+      <span class="status-badge status-live">● Live</span>
+      <div class="card-icon">📊</div>
+      <span class="card-tag">Financiamiento</span>
+      <h3>Comparador de Opciones de Financiamiento</h3>
+      <p>Análisis comparativo de alternativas de financiamiento: préstamos, leasing, cuotas y créditos. Evaluación de TNA, CFT y costo total de cada opción.</p>
+      <div class="card-meta">
+        <div class="card-chips">
+          <span class="chip">TNA / CFT</span>
+          <span class="chip">Cuotas</span>
+          <span class="chip">Leasing</span>
+        </div>
+        <div class="card-arrow">↗</div>
+      </div>
+    </a>
+
+    <!-- CARDS COMING SOON (placeholders) -->
+    <div class="card card-disabled" data-category="mercados" data-name="mercado renta fija bonos">
+      <span class="status-badge status-soon">Próximamente</span>
+      <div class="card-icon">📈</div>
+      <span class="card-tag">Mercados</span>
+      <h3>Monitor de Renta Fija</h3>
+      <p>Seguimiento en tiempo real de bonos, obligaciones negociables y rendimientos de cartera de renta fija local e internacional.</p>
+      <div class="card-meta">
+        <div class="card-chips">
+          <span class="chip">TIR</span>
+          <span class="chip">Duration</span>
+          <span class="chip">Spread</span>
+        </div>
+        <div class="card-arrow" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.3)">↗</div>
+      </div>
+    </div>
+
+    <div class="card card-disabled" data-category="portfolio" data-name="portfolio análisis cartera rendimiento">
+      <span class="status-badge status-soon">Próximamente</span>
+      <div class="card-icon">🗂️</div>
+      <span class="card-tag">Portfolio</span>
+      <h3>Análisis de Cartera</h3>
+      <p>Herramienta de seguimiento y análisis de rendimiento de cartera. YTD, drawdown máximo, Sharpe ratio y atribución de retorno por activo.</p>
+      <div class="card-meta">
+        <div class="card-chips">
+          <span class="chip">YTD</span>
+          <span class="chip">Sharpe</span>
+          <span class="chip">Drawdown</span>
+        </div>
+        <div class="card-arrow" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.3)">↗</div>
+      </div>
+    </div>
+
+    <div class="card card-disabled" data-category="mercados" data-name="mercado fci fondo común inversión">
+      <span class="status-badge status-soon">Próximamente</span>
+      <div class="card-icon">💼</div>
+      <span class="card-tag">Mercados</span>
+      <h3>Comparador de FCI</h3>
+      <p>Comparativa de Fondos Comunes de Inversión por categoría, rendimiento histórico, volatilidad y patrimonio bajo administración.</p>
+      <div class="card-meta">
+        <div class="card-chips">
+          <span class="chip">FCI</span>
+          <span class="chip">PBA</span>
+          <span class="chip">Volatilidad</span>
+        </div>
+        <div class="card-arrow" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.3)">↗</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COMING SOON MINI SECTION -->
+  <div style="margin-top: 60px;">
+    <div class="section-title">Roadmap de herramientas</div>
+    <div class="coming-soon-grid">
+      <div class="mini-card">
+        <div class="mini-icon">🔢</div>
+        <div class="mini-info">
+          <div class="title">Calculadora de Tipo de Cambio</div>
+          <div class="desc">MEP, CCL, oficial y blue — comparativa live</div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-icon">📋</div>
+        <div class="mini-info">
+          <div class="title">One-Pager de Instrumento</div>
+          <div class="desc">Ficha técnica de cualquier activo del mercado local</div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-icon">⚖️</div>
+        <div class="mini-info">
+          <div class="title">Simulador de Jubilación</div>
+          <div class="desc">Proyección de retiro según aportes y rentabilidad</div>
+        </div>
+      </div>
+      <div class="mini-card">
+        <div class="mini-icon">🌐</div>
+        <div class="mini-info">
+          <div class="title">Monitor Macro</div>
+          <div class="desc">Inflación, reservas, deuda y variables clave ARS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <span>Momentum</span> Capital Investment — Portal Interno
+  </div>
+  <div class="footer-legal">
+    Las herramientas contenidas en este portal son de uso exclusivo interno. La información presentada no constituye asesoramiento financiero. Momentum Capital Investment no garantiza la exactitud de los datos ni se responsabiliza por decisiones tomadas en base a los mismos.
+  </div>
+</footer>
+
+<script>
+  function filterCards(category, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      const cat = card.dataset.category || '';
+      if (category === 'all' || cat === category) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function searchCards(query) {
+    const q = query.toLowerCase().trim();
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      const name = (card.dataset.name || '') + ' ' + (card.querySelector('h3')?.textContent || '') + ' ' + (card.querySelector('p')?.textContent || '');
+      card.style.display = (!q || name.toLowerCase().includes(q)) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>
