@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparador de Financiamiento · MCI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  :root {
+    --navy: #0a1530;
+    --navy-light: #1a2548;
+    --navy-soft: #eaeaf5;
+    --cream: #f0e7d4;
+    --cream-soft: #faf6ee;
+    --accent: #2a3bcc;
+    --green: #16a34a;
+    --red: #dc2626;
+    --amber: #d97706;
+    --gray-50: #fafaf8;
+    --gray-100: #f3f2ee;
+    --gray-200: #e5e3dc;
+    --gray-300: #c9c5bd;
+    --gray-500: #6b6960;
+    --gray-700: #3a3833;
+    --gray-900: #14131a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    background: white;
+    color: var(--gray-900);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .serif { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 500; }
+  header {
+    background: white;
+    color: var(--navy);
+    padding: 32px 48px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    border-bottom: 1px solid var(--gray-200);
+    flex-wrap: wrap;
+  }
+  header .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--navy);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--navy);
+    line-height: 1.05;
+  }
+  header h1 .serif {
+    font-size: 1.02em;
+    font-weight: 500;
+  }
+  header .subtitle {
+    font-size: 14px;
+    color: var(--gray-500);
+    margin-top: 10px;
+    max-width: 480px;
+    line-height: 1.5;
+  }
+  .header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  .perc-logo {
+    text-align: right;
+    line-height: 1;
+  }
+  .perc-mark {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 42px;
+    color: var(--navy);
+    letter-spacing: -0.06em;
+    line-height: 0.9;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+  .perc-mark .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--navy);
+    border-radius: 50%;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  .perc-mark .accent {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--navy);
+    margin-left: 2px;
+  }
+  .perc-tagline {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-top: 8px;
+    font-weight: 600;
+  }
+  .container { padding: 32px 48px 60px; max-width: 1600px; margin: 0 auto; }
+
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .toolbar label { font-size: 12px; color: var(--gray-700); font-weight: 500; }
+  .toolbar select, .toolbar input {
+    padding: 7px 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+  }
+  button {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  button.primary { background: var(--navy); color: white; }
+  button.primary:hover { background: var(--navy-light); }
+  button.ghost { background: white; color: var(--navy); border: 1px solid var(--gray-300); }
+  button.ghost:hover { background: var(--gray-100); }
+  button.danger { background: transparent; color: var(--red); padding: 4px 8px; font-size: 12px; border: 1px solid transparent; border-radius: 5px; }
+  button.danger:hover { background: #fef2f2; border-color: #fecaca; }
+
+  .summary {
+    margin-bottom: 18px;
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .summary-pill {
+    display: block;
+  }
+  .summary-pill summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 22px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    transition: all 0.15s;
+    user-select: none;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .summary-pill summary::-webkit-details-marker { display: none; }
+  .summary-pill summary:hover { background: var(--navy-soft); border-color: var(--navy); }
+  .summary-pill summary .chevron { transition: transform 0.2s; font-size: 10px; opacity: 0.6; }
+  .summary-pill[open] summary { background: var(--navy); color: white; border-color: var(--navy); }
+  .summary-pill[open] summary svg { color: white; }
+  .summary-pill[open] summary .chevron { transform: rotate(180deg); }
+  .summary-pill summary .count-badge {
+    background: var(--navy-soft);
+    color: var(--navy);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+  .summary-pill[open] summary .count-badge { background: white; }
+  .summary-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--navy);
+  }
+  .summary-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .summary-card .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    font-size: 12px;
+  }
+  .summary-card .row .label { color: var(--gray-500); }
+  .summary-card .row .value { font-weight: 600; color: var(--gray-900); font-variant-numeric: tabular-nums; }
+  .summary-card .row.cft .value { color: var(--green); font-size: 14px; }
+  .summary-card .row.cft.high .value { color: var(--red); }
+
+  .entity {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .entity-header {
+    background: var(--navy-soft);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .entity-header .name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    min-width: 110px;
+  }
+  .entity-header .field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .entity-header .field label {
+    font-size: 11px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .entity-header input {
+    padding: 5px 8px;
+    border: 1px solid var(--gray-300);
+    border-radius: 5px;
+    font-size: 13px;
+    width: 90px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .field-row { display: flex; align-items: center; gap: 4px; }
+  .aplica-toggle {
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+  .aplica-toggle.on { background: var(--green); color: white; border-color: var(--green); }
+  .aplica-toggle.off { background: #fee2e2; color: var(--red); border-color: var(--red); }
+  .aplica-toggle:hover { transform: scale(1.15); }
+  .entity-header input.disabled { background: var(--gray-100); color: var(--gray-500); opacity: 0.6; }
+  .entity-header .spacer { flex: 1; }
+  .entity-header .totals {
+    display: flex;
+    gap: 18px;
+    font-size: 12px;
+  }
+  .entity-header .totals .item .label {
+    display: block;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+  }
+  .entity-header .totals .item .value {
+    font-weight: 700;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+  }
+  .entity-header .totals .item .value.cft { color: var(--green); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  thead th {
+    background: var(--gray-100);
+    padding: 8px 6px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--gray-700);
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  thead th:first-child, thead th.center { text-align: center; }
+  thead th.left { text-align: left; }
+  tbody td {
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--gray-100);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  tbody td.center { text-align: center; }
+  tbody td.calc { color: var(--gray-700); background: var(--gray-50); }
+  tbody td.neto { font-weight: 700; color: var(--navy); background: #fffbeb; }
+  tbody td.cft { font-weight: 700; color: var(--green); background: #f0fdf4; }
+  tbody td.cft.high { color: var(--red); background: #fef2f2; }
+  tbody td.tna { font-weight: 600; color: var(--navy); background: var(--navy-soft); }
+  tbody td.iva-full { font-weight: 600; color: var(--accent); background: #dbeafe; }
+  thead th.iva-head { background: #dbeafe; color: var(--accent); }
+  tbody td.spread { font-weight: 700; color: var(--amber); background: #fffbeb; }
+  tbody td.spread.high { color: var(--red); background: #fef2f2; }
+  tbody td input {
+    width: 100%;
+    border: 1px solid transparent;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    background: transparent;
+  }
+  tbody td input:hover { border-color: var(--gray-200); background: white; }
+  tbody td input:focus { border-color: var(--accent); outline: none; background: white; box-shadow: 0 0 0 2px #dbeafe; }
+  tbody td input[type=date] { min-width: 78px; max-width: 96px; padding: 2px 3px; font-size: 10px; }
+  tbody td input[type=date]::-webkit-calendar-picker-indicator { padding: 0; margin-left: 1px; opacity: 0.6; transform: scale(0.85); }
+  tfoot td {
+    padding: 8px 6px;
+    background: var(--navy-soft);
+    font-weight: 700;
+    text-align: right;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+  }
+  tfoot td.label { text-align: left; }
+
+  .add-row {
+    padding: 10px 16px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .add-row .hint { font-size: 11px; color: var(--gray-500); }
+
+  .empty {
+    padding: 40px;
+    text-align: center;
+    color: var(--gray-500);
+  }
+
+  .top-pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  .top-pills > details { margin-bottom: 0 !important; }
+  .formulas-pill {
+    display: inline-block;
+    margin-bottom: 0;
+  }
+  .formulas-pill summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: 1px solid var(--gray-300);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--navy);
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .formulas-pill summary::-webkit-details-marker { display: none; }
+  .formulas-pill summary:hover { background: var(--navy-soft); border-color: var(--navy); }
+  .formulas-pill summary .chevron { transition: transform 0.2s; font-size: 10px; opacity: 0.6; }
+  .formulas-pill[open] summary { background: var(--navy); color: white; border-color: var(--navy); }
+  .formulas-pill[open] summary .chevron { transform: rotate(180deg); }
+  .formulas-content {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    max-width: 100%;
+  }
+  .formulas-content b { color: var(--navy); }
+  .formulas-content code {
+    background: var(--gray-100);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+  }
+
+  .market-pill {
+    display: block;
+    margin: 20px 0 16px;
+  }
+  .market-pill summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--navy-soft) 0%, #f0fdf4 100%);
+    border: 1.5px solid var(--navy);
+    border-radius: 24px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    transition: all 0.15s;
+    user-select: none;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .market-pill summary::-webkit-details-marker { display: none; }
+  .market-pill summary:hover { background: var(--navy); color: white; }
+  .market-pill summary:hover svg { color: white; }
+  .market-pill summary .market-count {
+    background: white;
+    color: var(--navy);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    border: 1px solid var(--gray-200);
+  }
+  .market-pill summary:hover .market-count { background: var(--navy-soft); }
+  .market-pill summary .chevron { transition: transform 0.2s; font-size: 10px; opacity: 0.7; }
+  .market-pill[open] summary { background: var(--navy); color: white; }
+  .market-pill[open] summary svg { color: white; }
+  .market-pill[open] summary .chevron { transform: rotate(180deg); }
+
+  .section-title {
+    font-size: 13px;
+    color: var(--navy);
+    margin: 0 0 12px 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gray-200);
+  }
+
+  .ranking {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .rank-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .rank-card.winner {
+    border: 2px solid var(--green);
+    background: linear-gradient(135deg, #f0fdf4 0%, white 100%);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.15);
+  }
+  .rank-card .pos {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--gray-100);
+    color: var(--gray-700);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .rank-card.winner .pos {
+    background: var(--green);
+    color: white;
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4);
+  }
+  .rank-card .rank-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 2px;
+  }
+  .rank-card .rank-tna {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-bottom: 12px;
+  }
+  .rank-card .rank-tna-edit {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: var(--gray-500);
+    flex-wrap: wrap;
+  }
+  .rank-card .rank-tna-edit-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: var(--amber);
+  }
+  .rank-card .rank-tna-edit input {
+    width: 56px;
+    padding: 3px 6px;
+    border: 1.5px solid var(--amber);
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: right;
+    background: #fffbeb;
+    font-variant-numeric: tabular-nums;
+  }
+  .rank-card .rank-tna-edit input:focus {
+    outline: none;
+    border-color: var(--navy);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2);
+  }
+  .rank-card .rank-tna-edit .pct-sign {
+    font-size: 11px;
+    color: var(--gray-700);
+    font-weight: 700;
+  }
+  .rank-card .rank-tna-edit-meta { font-size: 10px; }
+  .rank-card .rank-cft {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .rank-card.winner .rank-cft { color: var(--green); }
+  .rank-card .rank-cft-label {
+    font-size: 10px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 12px;
+  }
+  .rank-card .rank-neto {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+    font-variant-numeric: tabular-nums;
+  }
+  .rank-card .rank-diff {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--gray-200);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .rank-card .rank-diff.bad { color: var(--red); }
+  .rank-card .rank-diff.best { color: var(--green); }
+  .rank-card .bar {
+    margin-top: 8px;
+    height: 4px;
+    background: var(--gray-100);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .rank-card .bar-fill {
+    height: 100%;
+    background: var(--navy);
+    transition: width 0.3s;
+  }
+  .rank-card.winner .bar-fill { background: var(--green); }
+
+  .vs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .vs-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .vs-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    gap: 12px;
+  }
+  .vs-header .vs-side {
+    text-align: center;
+  }
+  .vs-header .vs-side.win .name {
+    color: var(--green);
+    font-weight: 800;
+  }
+  .vs-header .vs-side.lose .name {
+    color: var(--gray-500);
+    font-weight: 600;
+    text-decoration: line-through;
+    text-decoration-color: var(--gray-300);
+  }
+  .vs-header .name {
+    font-size: 15px;
+    color: var(--navy);
+  }
+  .vs-header .meta {
+    font-size: 10px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+  }
+  .vs-divider {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--gray-300);
+    background: white;
+    padding: 4px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--gray-200);
+    letter-spacing: 1px;
+  }
+  .vs-body {
+    padding: 12px 16px;
+  }
+  .vs-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--gray-100);
+    font-size: 12px;
+  }
+  .vs-row:last-child { border-bottom: none; }
+  .vs-row .vs-label {
+    color: var(--gray-500);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+  }
+  .vs-row .vs-value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+  }
+  .vs-row .vs-value.good { color: var(--green); }
+  .vs-row .vs-value.big { font-size: 18px; }
+  .vs-warn {
+    margin-top: 10px;
+    padding: 6px 10px;
+    background: #fffbeb;
+    border-left: 3px solid var(--amber);
+    font-size: 11px;
+    color: var(--amber);
+    border-radius: 3px;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 760px;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+  }
+  .modal-header h2 {
+    margin: 0;
+    color: var(--navy);
+    font-size: 16px;
+  }
+  .modal-body { padding: 20px; }
+  .modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    position: sticky;
+    bottom: 0;
+    background: white;
+  }
+  .close-btn {
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 0 6px;
+  }
+  .close-btn:hover { color: var(--red); }
+
+  .import-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--gray-200);
+    margin-bottom: 16px;
+  }
+  .import-tab {
+    padding: 8px 14px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--gray-500);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .import-tab.active {
+    color: var(--navy);
+    border-bottom-color: var(--navy);
+  }
+  .import-pane { display: none; }
+  .import-pane.active { display: block; }
+
+  .dropzone {
+    border: 2px dashed var(--gray-300);
+    border-radius: 8px;
+    padding: 32px;
+    text-align: center;
+    color: var(--gray-500);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .dropzone:hover, .dropzone.over {
+    border-color: var(--navy);
+    background: var(--navy-soft);
+    color: var(--navy);
+  }
+  .dropzone .big { font-size: 32px; margin-bottom: 8px; color: var(--navy); }
+
+  .paste-area {
+    width: 100%;
+    min-height: 200px;
+    padding: 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    resize: vertical;
+  }
+
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .preview-table th, .preview-table td {
+    padding: 6px 8px;
+    border: 1px solid var(--gray-200);
+    text-align: left;
+  }
+  .preview-table th {
+    background: var(--gray-100);
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .preview-table tr.bad td { background: #fef2f2; color: var(--red); }
+  .preview-table select {
+    padding: 4px;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    font-size: 11px;
+    background: white;
+  }
+
+  .mapping-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .mapping-grid .field label {
+    font-size: 11px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .mapping-grid .field select, .mapping-grid .field input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--gray-300);
+    border-radius: 5px;
+    font-size: 13px;
+  }
+  .hint-box {
+    background: var(--gray-50);
+    border-left: 3px solid var(--accent);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--gray-700);
+    border-radius: 4px;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .hint-box b { color: var(--navy); }
+
+  .switch-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 12px;
+    color: var(--gray-700);
+    font-weight: 600;
+    padding: 6px 12px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 22px;
+    transition: all 0.2s;
+  }
+  .switch-toggle:hover { background: var(--gray-100); }
+  .switch-toggle.on {
+    background: #f0fdf4;
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .switch-toggle input { display: none; }
+  .switch-toggle .track {
+    width: 32px;
+    height: 18px;
+    background: var(--gray-300);
+    border-radius: 11px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .switch-toggle .track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .switch-toggle input:checked + .track { background: var(--green); }
+  .switch-toggle input:checked + .track::after { transform: translateX(14px); }
+
+  .sync-banner {
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfeff 100%);
+    border: 1px solid var(--green);
+    border-left: 4px solid var(--green);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sync-banner b { color: var(--green); }
+  .sync-banner .icon {
+    font-size: 24px;
+    color: var(--green);
+  }
+  .sync-badge {
+    display: inline-block;
+    background: #d1fae5;
+    color: #047857;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-left: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="eyebrow">Comparador de Financiamiento · Análisis para</div>
+    <div style="display:flex;align-items:baseline;gap:14px;margin-top:6px">
+      <input id="client-name-input" type="text" placeholder="Nombre del Cliente (ej: AYSA, GCBA, ...)" onchange="updateClientName(this.value)" style="border:none;border-bottom:2px dashed var(--gray-300);background:transparent;font-family:'Playfair Display', Georgia, serif;font-style:italic;font-weight:500;font-size:34px;letter-spacing:-0.01em;color:var(--navy);min-width:340px;padding:2px 0;outline:none">
+    </div>
+    <h1 style="margin-top:8px;font-size:22px;font-weight:600">Comparador <span class="serif">de Financiamiento</span>.</h1>
+    <div class="subtitle">Compará el costo real: el banco te cotiza 24% TNA y la ALYC 30% — ¿cuál es más barato? Los impuestos bancarios (IVA, Sellos, D&amp;C) cambian todo.</div>
+  </div>
+  <div class="header-right">
+    <div class="perc-logo" title="MCI">
+      <div class="perc-mark">MCI<span class="dot"></span></div>
+      <div class="perc-tagline">Mercado de Capitales · Inversiones</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end">
+      <button class="primary" onclick="openImportModal()" style="display:inline-flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importar Cartera
+      </button>
+      <button class="primary" onclick="printPDF()" style="background:#16a34a;display:inline-flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir / PDF
+      </button>
+      <button class="primary" onclick="exportExcel()" style="display:inline-flex;align-items:center;gap:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+        Exportar Excel
+      </button>
+      <button class="ghost" onclick="exportData()" style="display:inline-flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Exportar JSON
+      </button>
+      <button class="ghost" onclick="importData()" style="display:inline-flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Importar JSON
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="top-pills">
+    <details class="formulas-pill">
+      <summary>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Ver fórmulas
+        <span class="chevron">▾</span>
+      </summary>
+      <div class="formulas-content">
+        <b>Costos proporcionales al plazo:</b>
+        <code>Intereses = Capital × TNA × Días / 365</code> ·
+        <code>Sellos = Capital × Sellos% × Días / 365</code> <i>(bancos, default 1,2%)</i> ·
+        <code>Derechos = Capital × Derechos% × Días / 365</code> <i>(ALYC/MAV, default 0,06%)</i> ·
+        <b>Impuestos sobre gastos financieros:</b>
+        <code>IVA = (Intereses + Sellos + Derechos) × IVA%</code> <i>(bancos 21%, ALYC 0%)</i> ·
+        <code>IIBB = (Intereses + Sellos + Derechos) × IIBB%</code> <i>(default 0%)</i> ·
+        <b>Impuesto sobre el neto acreditado:</b>
+        <code>Imp. D&amp;C = (Capital − Costos previos) × D&amp;C%</code> <i>(bancos 0,6%; ALYC vía MM exento)</i> ·
+        <b>Comisión:</b>
+        <code>MCI = Capital × MCI%</code> <i>(default 0%)</i> ·
+        <b>NETO = Capital − Intereses − Sellos − Derechos − IVA − IIBB − Imp.D&amp;C − MCI</b> ·
+        <b style="color:var(--green)">TNA Efectiva = (CostoTotal / NETO) × (365 / Días)</b> — método del comparador MCI. Cuando todos los impuestos son 0, TNA Efectiva ≈ TNA cotizada.
+      </div>
+    </details>
+    <div id="market-pill-host"></div>
+  </div>
+
+  <div class="toolbar">
+    <label>Agregar canal:</label>
+    <select id="entity-picker" onchange="applyEntityPreset(this.value)">
+      <option value="MOMENTUM" selected>MOMENTUM (ALYC · MM)</option>
+      <option value="MOMENTUM_SINMM">MOMENTUM (sin MM)</option>
+      <option value="M">M</option>
+      <option value="BC">BC</option>
+      <option value="S">S</option>
+      <option value="G">G</option>
+    </select>
+    <label style="font-size:12px;color:var(--gray-700);font-weight:500">TNA / All-in %:</label>
+    <input id="entity-tna" type="number" step="0.01" placeholder="TNA %" value="30" style="width:80px" title="Tasa Nominal Anual (o All-in para ALYC)">
+    <label style="font-size:12px;color:var(--gray-700);font-weight:500">Sellos %:</label>
+    <input id="entity-sellos" type="number" step="0.001" placeholder="Sellos" value="0" style="width:65px" title="Imp. de Sellos: capital × % × días/365. Bancos: 1.2%. ALYC: 0%.">
+    <label style="font-size:12px;color:var(--gray-700);font-weight:500">IVA %:</label>
+    <input id="entity-iva" type="number" step="0.01" placeholder="IVA %" value="0" style="width:60px" title="IVA sobre intereses + sellos + derechos. Bancos: 21%. ALYC: 0%.">
+    <label style="font-size:12px;color:var(--gray-700);font-weight:500">IIBB %:</label>
+    <input id="entity-iibb" type="number" step="0.01" placeholder="IIBB %" value="0" style="width:60px" title="Ingresos Brutos sobre base de gastos (default 0%)">
+    <label style="font-size:12px;color:var(--gray-700);font-weight:500">D&amp;C %:</label>
+    <input id="entity-dc" type="number" step="0.001" placeholder="D&C %" value="0" style="width:65px" title="Imp. Débitos y Créditos: (capital − costos previos) × %. Bancos: 0.6%. ALYC vía MM: 0% (exento).">
+    <label style="font-size:12px;color:var(--gray-700);font-weight:500">Derechos %:</label>
+    <input id="entity-derechos" type="number" step="0.001" placeholder="Derechos" value="0.06" style="width:70px" title="Derechos de mercado (MAV/BYMA): capital × % × días/365. ALYC: 0.06%. Banco: 0%.">
+    <label style="font-size:12px;color:var(--gray-700);font-weight:500">MCI %:</label>
+    <input id="entity-mci" type="number" step="0.01" placeholder="MCI %" value="0" style="width:60px" title="Comisión MCI sobre capital (default 0%)">
+    <button class="primary" onclick="addEntity()" id="add-entity-btn">+ Agregar</button>
+    <button class="ghost" onclick="addDefaultDescubiertos()" title="Carga 4 escenarios bancarios de descubierto: M 27,5%, BC 29%, S 32%, G 37%" style="background:#fffbeb;border-color:#d97706;color:#b45309">⬇ Descubiertos</button>
+    <div style="flex:1"></div>
+    <label class="switch-toggle" id="sync-toggle-wrap">
+      <input type="checkbox" id="synced-toggle" onchange="toggleSyncedMode(this.checked)">
+      <span class="track"></span>
+      <span>Modo Comparativa · cartera única</span>
+    </label>
+    <button class="ghost" onclick="resetAll()">Reset Todo</button>
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <div id="comparison"></div>
+
+  <div id="entities"></div>
+
+</div>
+
+<div id="modal-root"></div>
+
+<script>
+const STORAGE_KEY = 'descuento_cheques_mci_v2';
+// Defaults por tipo de entidad
+const DEFAULTS_BANCO = { sellos:1.2, iva:21, iibb:0, dc:0.6, derechos:0, mci:0,
+  sellosAplica:true, ivaAplica:true, iibbAplica:false, dcAplica:true, derechosAplica:false, mciAplica:false };
+const DEFAULTS_ALYC_MM = { sellos:0, iva:0, iibb:0, dc:0, derechos:0.06, mci:0,
+  sellosAplica:false, ivaAplica:false, iibbAplica:false, dcAplica:false, derechosAplica:true, mciAplica:false };
+const DEFAULTS_ALYC_SINMM = { sellos:0, iva:0, iibb:0, dc:0.6, derechos:0.06, mci:0,
+  sellosAplica:false, ivaAplica:false, iibbAplica:false, dcAplica:true, derechosAplica:true, mciAplica:false };
+
+function entityDefaults(name) {
+  if (/MOMENTUM/i.test(name)) return { ...DEFAULTS_ALYC_MM };
+  if (/SIN.?MM|SINMM/i.test(name)) return { ...DEFAULTS_ALYC_SINMM };
+  return { ...DEFAULTS_BANCO };
+}
+
+function isDescubierto(e) {
+  return /\(Desc\.\)/i.test((e && e.name) || '');
+}
+
+function isAllIn(e) {
+  return !!(e && e.name && /MOMENTUM/i.test(e.name.trim()));
+}
+
+function tnaLabel(e) {
+  return isAllIn(e) ? 'All in' : 'TNA';
+}
+
+function effectiveRanking(r) {
+  return r.totals.tnaEfectivaPond;
+}
+
+function effectiveRankingLabel(r) {
+  return 'TNA Ef.';
+}
+
+// Aplica preset al toolbar cuando cambia el selector
+function applyEntityPreset(name) {
+  const p = entityDefaults(name);
+  const setV = (id, v) => { const el = document.getElementById(id); if(el) el.value = v; };
+  setV('entity-sellos',   p.sellos);
+  setV('entity-iva',      p.iva);
+  setV('entity-iibb',     p.iibb);
+  setV('entity-dc',       p.dc);
+  setV('entity-derechos', p.derechos);
+  setV('entity-mci',      p.mci);
+  // TNA sugerida
+  const tnaMap = { 'MOMENTUM': 30, 'MOMENTUM_SINMM': 30, 'M': 27.5, 'BC': 25, 'S': 32, 'G': 37 };
+  if (tnaMap[name] !== undefined) setV('entity-tna', tnaMap[name]);
+}
+
+let state = load() || { entities: [], syncedMode: false, clientName: '' };
+if (state.syncedMode === undefined) state.syncedMode = false;
+if (state.clientName === undefined) state.clientName = '';
+
+function clientLabel() {
+  return (state.clientName && state.clientName.trim()) || 'Cliente';
+}
+
+function updateClientName(value) {
+  state.clientName = (value || '').trim();
+  save();
+  render();
+}
+
+function toggleAplica(entityId, field) {
+  const e = state.entities.find(x => x.id === entityId);
+  const key = field + 'Aplica';
+  e[key] = !e[key];
+  save();
+  render();
+}
+
+function effectiveRate(e, field) {
+  const aplicaKey = field + 'Aplica';
+  if (e[aplicaKey] === false) return 0;
+  if (field === 'iva')      return e.iva      ?? 0;
+  if (field === 'iibb')     return e.iibb     ?? 0;
+  if (field === 'sellos')   return e.sellos   ?? 0;
+  if (field === 'dc')       return e.dc       ?? 0;
+  if (field === 'derechos') return e.derechos ?? 0;
+  if (field === 'mci')      return e.mci      ?? 0;
+  return 0;
+}
+state.entities.forEach((e) => {
+  // Migración desde versión anterior
+  if (e.impCheque !== undefined && e.sellos === undefined) { e.sellos = 0; e.sellosAplica = false; }
+  if (e.sircreb  !== undefined && e.dc      === undefined) { e.dc    = 0; e.dcAplica    = false; }
+  if (e.percDirect !== undefined && e.mci   === undefined) { e.mci   = e.percDirect; e.mciAplica = e.percAplica ?? false; }
+  // Defaults
+  if (e.iva      === undefined) e.iva      = 0;
+  if (e.iibb     === undefined) e.iibb     = 0;
+  if (e.sellos   === undefined) e.sellos   = 0;
+  if (e.dc       === undefined) e.dc       = 0;
+  if (e.derechos === undefined) e.derechos = 0;
+  if (e.mci      === undefined) e.mci      = 0;
+  if (e.ivaAplica      === undefined) e.ivaAplica      = false;
+  if (e.iibbAplica     === undefined) e.iibbAplica     = false;
+  if (e.sellosAplica   === undefined) e.sellosAplica   = false;
+  if (e.dcAplica       === undefined) e.dcAplica       = false;
+  if (e.derechosAplica === undefined) e.derechosAplica = false;
+  if (e.mciAplica      === undefined) e.mciAplica      = false;
+});
+
+if (state.descubiertosAutoLoaded !== true) {
+  const _defaultBanks = [
+    { name: 'M (Desc.)', tna: 27.5 },
+    { name: 'BC (Desc.)', tna: 25 },
+    { name: 'S (Desc.)', tna: 32 },
+    { name: 'G (Desc.)', tna: 37 }
+  ];
+  const _defM = entityDefaults('MOMENTUM');
+  const _defB = entityDefaults('BANCO');
+  let _masterChecks = [];
+  if (state.syncedMode) {
+    const _master = state.entities.find(e => e.checks && e.checks.length > 0);
+    if (_master) _masterChecks = _master.checks;
+  }
+  // 1 ALYC + 4 bancos
+  state.entities.push({
+    id: Math.random().toString(36).slice(2,10),
+    name: 'MOMENTUM', tna: 30,
+    ..._defM, checks: []
+  });
+  _defaultBanks.forEach(b => {
+    const _checks = (state.syncedMode && _masterChecks.length > 0)
+      ? _masterChecks.map(c => { const { tna, ...rest } = c; return { ...rest, id: Math.random().toString(36).slice(2,10) }; })
+      : [];
+    state.entities.push({
+      id: Math.random().toString(36).slice(2,10),
+      name: b.name, tna: b.tna,
+      ..._defB, checks: _checks
+    });
+  });
+  state.descubiertosAutoLoaded = true;
+  save();
+}
+
+if (state.descubiertosTnaCleanup !== true) {
+  state.entities.forEach(e => {
+    if (/\(Desc\.\)/i.test(e.name || '')) {
+      e.checks.forEach(c => { delete c.tna; });
+    }
+  });
+  state.descubiertosTnaCleanup = true;
+  save();
+}
+
+state.entities.forEach((e, ei) => {
+  e.checks.forEach((c, ci) => {
+    if (c.dueno === undefined) c.dueno = '';
+    if (!c.logicalId) {
+      if (state.syncedMode && ei > 0 && state.entities[0] && state.entities[0].checks[ci]) {
+        c.logicalId = state.entities[0].checks[ci].logicalId || Math.random().toString(36).slice(2, 10);
+      } else {
+        c.logicalId = Math.random().toString(36).slice(2, 10);
+      }
+    }
+  });
+});
+
+function syncChecks(sourceEntityId) {
+  if (!state.syncedMode) return;
+  const source = state.entities.find(e => e.id === sourceEntityId);
+  if (!source) return;
+  state.entities.forEach(e => {
+    if (e.id !== sourceEntityId) {
+      const tnaByLogical = {};
+      e.checks.forEach(c => {
+        if (c.tna !== undefined && c.tna !== null && c.tna !== '' && c.logicalId) {
+          tnaByLogical[c.logicalId] = c.tna;
+        }
+      });
+      e.checks = source.checks.map(c => {
+        const newCheck = { ...c, id: uid() };
+        const preserved = tnaByLogical[c.logicalId];
+        if (preserved !== undefined) {
+          newCheck.tna = preserved;
+        } else {
+          delete newCheck.tna;
+        }
+        return newCheck;
+      });
+    }
+  });
+}
+
+function toggleSyncedMode(enabled) {
+  if (enabled) {
+    const withChecks = state.entities.filter(e => e.checks.length > 0);
+    let master = null;
+    if (withChecks.length > 0) {
+      master = withChecks[0];
+      withChecks.forEach(e => { if (e.checks.length > master.checks.length) master = e; });
+      const others = state.entities.filter(e => e.id !== master.id && e.checks.length > 0);
+      const conflicts = others.filter(e => !checksMatch(e.checks, master.checks));
+      if (conflicts.length > 0) {
+        const ok = confirm(`Modo Comparativa: voy a copiar los ${master.checks.length} cheques de "${master.name}" a TODAS las entidades.\n\nSe van a sobrescribir los cheques actuales de: ${conflicts.map(e => e.name).join(', ')}\n\n¿Continuar?`);
+        if (!ok) {
+          document.getElementById('synced-toggle').checked = false;
+          return;
+        }
+      }
+      state.entities.forEach(e => {
+        if (e.id !== master.id) {
+          const targetTnas = e.checks.map(c => c.tna);
+          e.checks = master.checks.map((c, i) => {
+            const newCheck = { ...c, id: uid() };
+            const preservedTna = targetTnas[i];
+            if (preservedTna !== undefined && preservedTna !== null && preservedTna !== '') {
+              newCheck.tna = preservedTna;
+            } else {
+              delete newCheck.tna;
+            }
+            return newCheck;
+          });
+        }
+      });
+    }
+    state.syncedMode = true;
+  } else {
+    state.syncedMode = false;
+  }
+  save();
+  render();
+}
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { return null; }
+}
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function uid() { return Math.random().toString(36).slice(2, 10); }
+
+function todayISO() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+function addDaysISO(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+function diffDays(from, to) {
+  if (!from || !to) return 0;
+  const a = new Date(from + 'T00:00:00');
+  const b = new Date(to + 'T00:00:00');
+  return Math.round((b - a) / 86400000);
+}
+
+function fmt(n) {
+  if (!isFinite(n)) return '—';
+  return n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtPct(n) {
+  if (!isFinite(n)) return '—';
+  return (n * 100).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+}
+function fmtCapital(n) {
+  const num = +n || 0;
+  return Math.round(num).toLocaleString('es-AR', { maximumFractionDigits: 0 });
+}
+function parseCapital(s) {
+  if (typeof s === 'number') return s;
+  const cleaned = String(s).replace(/\./g, '').replace(/[^\d,-]/g, '').replace(',', '.');
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
+}
+function formatFecha(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso + 'T00:00:00');
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function calcRow(check, tnaPct, ivaPct, iibbPct, sellosPct, dcPct, derechosPct, mciPct) {
+  const hasOverride = check.tna !== undefined && check.tna !== null && check.tna !== '' && !isNaN(+check.tna);
+  const effectiveTnaPct = hasOverride ? +check.tna : (tnaPct || 0);
+  const tna = effectiveTnaPct / 100;
+  const capital = +check.capital || 0;
+  const dias = diffDays(check.fechaInicial, check.fechaCheque);
+
+  // Costos proporcionales al plazo
+  const intereses = capital * tna              * dias / 365;
+  const sellos    = capital * (sellosPct / 100) * dias / 365;
+  const derechos  = capital * (derechosPct / 100) * dias / 365;
+
+  // Impuestos sobre la base de gastos financieros
+  const baseGastos = intereses + sellos + derechos;
+  const iva  = baseGastos * (ivaPct  / 100);
+  const iibb = baseGastos * (iibbPct / 100);
+
+  // D&C: sobre el importe neto a acreditar (capital menos costos previos)
+  const costosPreviosDC = intereses + sellos + derechos + iva + iibb;
+  const dc  = Math.max(0, capital - costosPreviosDC) * (dcPct / 100);
+
+  // Comisión MCI: tasa anualizada sobre capital (igual que derechos de mercado)
+  const mci = capital * (mciPct / 100) * dias / 365;
+
+  const totalCost = costosPreviosDC + dc + mci;
+  const neto = capital - totalCost;
+
+  // TNA Efectiva: (costo/neto) × (365/días) — fórmula del modelo Excel de referencia
+  let tnaEfectiva = NaN;
+  if (dias > 0 && neto > 0) {
+    tnaEfectiva = (totalCost / neto) * (365 / dias);
+  }
+
+  // TEA (descubiertos: capitalización mensual de la TNA)
+  const tem = effectiveTnaPct / 100 / 12;
+  const tea = Math.pow(1 + tem, 12) - 1;
+
+  return { capital, dias, intereses, sellos, derechos, iva, iibb, dc, mci, totalCost, neto, tnaEfectiva, tea, effectiveTnaPct, hasOverride };
+}
+
+function entityTotals(entity) {
+  let totCapital=0, totIntereses=0, totSellos=0, totDerechos=0, totIVA=0, totIIBB=0, totDC=0, totMCI=0, totNeto=0;
+  let weightedEfectiva=0, weightedTEA=0, weightCapital=0, weightedTnaSum=0;
+  let hasAnyOverride = false;
+  entity.checks.forEach(c => {
+    const r = calcRow(c, entity.tna,
+      effectiveRate(entity,'iva'), effectiveRate(entity,'iibb'),
+      effectiveRate(entity,'sellos'), effectiveRate(entity,'dc'),
+      effectiveRate(entity,'derechos'), effectiveRate(entity,'mci'));
+    totCapital   += r.capital;
+    totIntereses += r.intereses;
+    totSellos    += r.sellos;
+    totDerechos  += r.derechos;
+    totIVA       += r.iva;
+    totIIBB      += r.iibb;
+    totDC        += r.dc;
+    totMCI       += r.mci;
+    totNeto      += r.neto;
+    weightedTnaSum += r.effectiveTnaPct * r.capital;
+    if (r.hasOverride) hasAnyOverride = true;
+    if (isFinite(r.tnaEfectiva)) {
+      weightedEfectiva += r.tnaEfectiva * r.capital;
+      weightCapital    += r.capital;
+    }
+    if (isFinite(r.tea)) weightedTEA += r.tea * r.capital;
+  });
+  const tnaEfectivaPond = weightCapital > 0 ? weightedEfectiva / weightCapital : NaN;
+  const teaPond  = weightCapital > 0 ? weightedTEA / weightCapital : NaN;
+  const tnaPond  = totCapital > 0 ? weightedTnaSum / totCapital : (entity.tna || 0);
+  // cftPond alias para no romper referencias en renderComparison
+  const cftPond = tnaEfectivaPond;
+  return { totCapital, totIntereses, totSellos, totDerechos, totIVA, totIIBB, totDC, totMCI, totNeto, tnaEfectivaPond, cftPond, teaPond, tnaPond, hasAnyOverride };
+}
+
+function addEntity() {
+  const pickerVal = document.getElementById('entity-picker').value;
+  const displayName = pickerVal === 'MOMENTUM_SINMM' ? 'MOMENTUM (sin MM)' : pickerVal;
+  const tna       = +document.getElementById('entity-tna').value     || 0;
+  const sellos    = +document.getElementById('entity-sellos').value  || 0;
+  const iva       = +document.getElementById('entity-iva').value     || 0;
+  const iibb      = +document.getElementById('entity-iibb').value    || 0;
+  const dc        = +document.getElementById('entity-dc').value      || 0;
+  const derechos  = +document.getElementById('entity-derechos').value|| 0;
+  const mci       = +document.getElementById('entity-mci').value     || 0;
+  const preset    = entityDefaults(pickerVal);
+  let checks;
+  if (state.syncedMode && state.entities.length > 0) {
+    const master = state.entities.find(e => e.checks.length > 0) || state.entities[0];
+    checks = master.checks.map(c => ({ ...c, id: uid() }));
+  } else {
+    checks = [newCheck()];
+  }
+  state.entities.push({
+    id: uid(), name: displayName, tna,
+    sellos, iva, iibb, dc, derechos, mci,
+    sellosAplica:   sellos   > 0 ? true : preset.sellosAplica,
+    ivaAplica:      iva      > 0 ? true : preset.ivaAplica,
+    iibbAplica:     iibb     > 0 ? true : preset.iibbAplica,
+    dcAplica:       dc       > 0 ? true : preset.dcAplica,
+    derechosAplica: derechos > 0 ? true : preset.derechosAplica,
+    mciAplica:      mci      > 0 ? true : preset.mciAplica,
+    checks
+  });
+  save();
+  render();
+}
+
+function addDefaultDescubiertos() {
+  const banks = [
+    { name: 'M (Desc.)', tna: 27.5 },
+    { name: 'BC (Desc.)', tna: 25 },
+    { name: 'S (Desc.)', tna: 32 },
+    { name: 'G (Desc.)', tna: 37 }
+  ];
+  const preset = { ...DEFAULTS_BANCO, sellos: 0, sellosAplica: false }; // descubierto: sin sellos
+  banks.forEach(b => {
+    let checks;
+    if (state.syncedMode && state.entities.length > 0) {
+      const master = state.entities.find(e => e.checks.length > 0) || state.entities[0];
+      checks = master.checks.map(c => { const { tna, ...rest } = c; return { ...rest, id: uid() }; });
+    } else {
+      checks = [newCheck()];
+    }
+    state.entities.push({ id: uid(), name: b.name, tna: b.tna, ...preset, checks });
+  });
+  save();
+  render();
+}
+
+function newCheck() {
+  return {
+    id: uid(),
+    logicalId: uid(),
+    dueno: '',
+    fechaInicial: todayISO(),
+    fechaCheque: addDaysISO(30),
+    capital: 1000000
+  };
+}
+
+function removeEntity(id) {
+  if (!confirm('¿Eliminar esta entidad y todos sus cheques?')) return;
+  state.entities = state.entities.filter(e => e.id !== id);
+  save();
+  render();
+}
+
+function addCheck(entityId) {
+  const e = state.entities.find(x => x.id === entityId);
+  e.checks.push(newCheck());
+  syncChecks(entityId);
+  save();
+  render();
+}
+
+function removeCheck(entityId, checkId) {
+  const e = state.entities.find(x => x.id === entityId);
+  e.checks = e.checks.filter(c => c.id !== checkId);
+  syncChecks(entityId);
+  save();
+  render();
+}
+
+function duplicateCheck(entityId, checkId) {
+  const e = state.entities.find(x => x.id === entityId);
+  const idx = e.checks.findIndex(c => c.id === checkId);
+  if (idx === -1) return;
+  const copy = { ...e.checks[idx], id: uid(), logicalId: uid() };
+  e.checks.splice(idx + 1, 0, copy);
+  syncChecks(entityId);
+  save();
+  render();
+}
+
+function updateEntity(id, field, value) {
+  const e = state.entities.find(x => x.id === id);
+  e[field] = (['tna','iva','iibb','sellos','dc','derechos','mci'].includes(field)) ? +value : value;
+  if (field === 'tna' && isDescubierto(e)) {
+    e.checks.forEach(c => { delete c.tna; });
+  }
+  save();
+  render();
+}
+
+function updateCheck(entityId, checkId, field, value) {
+  const e = state.entities.find(x => x.id === entityId);
+  const c = e.checks.find(x => x.id === checkId);
+  if (field === 'capital') c[field] = +value;
+  else if (field === 'tna') c.tna = (value === '' || value === null) ? undefined : +value;
+  else c[field] = value;
+  if (c.fechaCheque && c.fechaInicial && new Date(c.fechaCheque) < new Date(c.fechaInicial)) {
+    if (field === 'fechaCheque') c.fechaCheque = c.fechaInicial;
+    else if (field === 'fechaInicial') c.fechaInicial = c.fechaCheque;
+  }
+  if (field !== 'tna') syncChecks(entityId);
+  save();
+  render();
+}
+
+function copyChecksFrom(targetEntityId) {
+  const sources = state.entities.filter(e => e.id !== targetEntityId && e.checks.length > 0);
+  if (sources.length === 0) { alert('No hay otra entidad con cheques cargados.'); return; }
+  const opts = sources.map((e, i) => `${i+1}. ${e.name} (${e.checks.length} cheques)`).join('\n');
+  const choice = prompt(`Copiar cheques desde:\n${opts}\n\nNúmero:`);
+  const idx = parseInt(choice) - 1;
+  if (isNaN(idx) || !sources[idx]) return;
+  const target = state.entities.find(e => e.id === targetEntityId);
+  target.checks = sources[idx].checks.map(c => ({ ...c, id: uid() }));
+  save();
+  render();
+}
+
+function resetAll() {
+  if (!confirm('¿Borrar todas las entidades y cheques?')) return;
+  state = { entities: [] };
+  save();
+  render();
+}
+
+// ===== IMPORT EXCEL / CSV / PASTE =====
+
+let importContext = { entityId: null, rows: [], headers: [], mapping: {} };
+
+function openImportModal(entityId) {
+  if (state.entities.length === 0) {
+    alert('Primero agregá al menos una entidad (BC / M / MOMENTUM) para poder importar cheques.');
+    return;
+  }
+  if (!entityId) entityId = state.entities[0].id;
+  importContext = { entityId, rows: [], headers: [], mapping: {} };
+  const root = document.getElementById('modal-root');
+  const entityOpts = state.entities.map(en =>
+    `<option value="${en.id}" ${en.id === entityId ? 'selected' : ''}>${en.name} · TNA ${en.tna}% · ${en.checks.length} cheques actuales</option>`
+  ).join('');
+  root.innerHTML = `
+    <div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Importar Instrumentos</h2>
+          <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div style="margin-bottom:14px;padding:10px 12px;background:var(--navy-soft);border-radius:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <label style="font-size:12px;color:var(--navy);font-weight:600">Importar en:</label>
+            <select id="import-entity-select" onchange="importContext.entityId=this.value" style="padding:6px 10px;border:1px solid var(--gray-300);border-radius:5px;font-size:13px;background:white;font-weight:600;color:var(--navy);min-width:280px">
+              ${entityOpts}
+            </select>
+          </div>
+          <div class="hint-box">
+            <b>Dos opciones:</b> subí un Excel/CSV con tu cartera, o pegá filas directamente desde una planilla.<br>
+            Columnas esperadas: <b>Dueño</b> (opcional) · <b>Fecha Inicial</b> · <b>Fecha Cheque/Vencimiento</b> · <b>Capital/Monto</b>
+          </div>
+          <div class="import-tabs">
+            <button class="import-tab active" onclick="switchImportTab('file', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Subir Excel / CSV
+            </button>
+            <button class="import-tab" onclick="switchImportTab('paste', this)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Pegar desde Excel
+            </button>
+          </div>
+          <div id="pane-file" class="import-pane active">
+            <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+              <div class="big" style="font-size:28px">📂</div>
+              <div style="font-weight:600;margin-bottom:4px">Hacé clic o arrastrá tu archivo</div>
+              <div style="font-size:11px;color:var(--gray-500)">.xlsx · .xls · .csv</div>
+              <input id="file-input" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])">
+            </div>
+            <div id="file-status" style="display:none;margin-top:12px;padding:10px 14px;background:var(--gray-50);border-radius:6px;font-size:12px;color:var(--gray-700)"></div>
+          </div>
+          <div id="pane-paste" class="import-pane">
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">
+              Seleccioná las filas en tu planilla y pegá con <kbd style="background:var(--gray-100);padding:1px 5px;border-radius:3px;border:1px solid var(--gray-300);font-size:11px">Ctrl+V</kbd>. Incluí la fila de encabezados para mejor detección automática.
+            </div>
+            <textarea class="paste-area" id="paste-area" placeholder="Pegá acá las filas de Excel. Ejemplo con encabezados:&#10;Fecha Inicial&#9;Fecha Cheque&#9;Capital&#10;26/05/2026&#9;25/06/2026&#9;1.000.000&#10;26/05/2026&#9;15/07/2026&#9;500.000&#10;&#10;También podés pegar sin encabezados — el sistema detecta automáticamente."></textarea>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--gray-500)">Separadores aceptados: tabulación, punto y coma, o coma</span>
+              <button class="primary" onclick="parsePasted()">Procesar →</button>
+            </div>
+          </div>
+          <div id="import-preview"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="ghost" onclick="closeModal()">Cancelar</button>
+          <button class="primary" id="btn-import" onclick="confirmImport()" disabled>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>
+            Importar cheques
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  setupDropzone();
+}
+
+function closeModal() {
+  document.getElementById('modal-root').innerHTML = '';
+}
+
+function switchImportTab(tab, btn) {
+  document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.import-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pane-' + tab).classList.add('active');
+}
+
+function setupDropzone() {
+  const dz = document.getElementById('dropzone');
+  if (dz) {
+    ['dragover', 'dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('over'); }));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('over'); }));
+    dz.addEventListener('drop', e => {
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+  }
+}
+
+// Simplified: only Excel/CSV import
+function handleFile(file) {
+  if (!file) return;
+  const st = document.getElementById('file-status');
+  if (st) { st.style.display = 'block'; st.innerHTML = `<b>Procesando:</b> ${file.name}...`; }
+  const name = (file.name || '').toLowerCase();
+  if (name.endsWith('.csv')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        parseFlexibleText(e.target.result);
+        if (st) st.style.display = 'none';
+      } catch (err) {
+        if (st) st.innerHTML = `<b style="color:var(--red)">Error:</b> ${err.message}`;
+      }
+    };
+    reader.readAsText(file);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array', cellDates: true });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
+      if (st) st.style.display = 'none';
+      processRawRows(rows);
+    } catch (err) {
+      if (st) st.innerHTML = `<b style="color:var(--red)">Error al leer el archivo:</b> ${err.message}`;
+      else alert('No se pudo leer el archivo: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parsePasted() {
+  const text = document.getElementById('paste-area').value.trim();
+  if (!text) { alert('Pegá algún texto primero.'); return; }
+  parseFlexibleText(text);
+}
+
+function parseFlexibleText(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length === 0) { alert('No hay texto válido.'); return; }
+  let rows;
+  if (text.includes('\t')) {
+    rows = lines.map(l => l.split('\t').map(c => c.trim()));
+  } else if (text.includes(';')) {
+    rows = lines.map(l => l.split(';').map(c => c.trim()));
+  } else if (lines.some(l => /\s{2,}/.test(l))) {
+    rows = lines.map(l => l.split(/\s{2,}/).map(c => c.trim()).filter(c => c));
+  } else if (lines.some(l => l.split(',').length >= 3)) {
+    rows = lines.map(l => l.split(',').map(c => c.trim()));
+  } else {
+    rows = lines.map(l => smartSplitLine(l));
+  }
+  processRawRows(rows);
+}
+
+function smartSplitLine(line) {
+  const tokens = [];
+  const re = /(\d{1,2}[\-\s\/\.]?(?:ene|enero|jan|feb|febrero|mar|marzo|abr|apr|abril|may|mayo|jun|junio|jul|julio|ago|aug|agosto|sep|set|septiembre|setiembre|oct|octubre|nov|noviembre|dic|dec|diciembre)\.?(?:[\-\s\/\.]?\d{2,4})?)|(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})|(\d{4}-\d{1,2}-\d{1,2})|([\$\-]?\d{1,3}(?:[\.,]\d{3})*(?:[\.,]\d+)?)|([A-Za-zÁÉÍÓÚáéíóúñÑ]+)/gi;
+  let m;
+  while ((m = re.exec(line)) !== null) tokens.push(m[0]);
+  return tokens;
+}
+
+function processRawRows(rows) {
+  if (!rows || rows.length === 0) { alert('Archivo vacío.'); return; }
+  rows = rows.filter(r => r.some(c => c !== null && c !== undefined && String(c).trim() !== ''));
+  if (rows.length === 0) { alert('No hay filas con datos.'); return; }
+
+  const firstRow = rows[0].map(c => String(c || '').toLowerCase().trim());
+  const hasHeader = firstRow.some(c => /fecha|capital|monto|importe|inicio|cheque|vencim|cobro|valor/.test(c));
+
+  let headers, dataRows;
+  if (hasHeader) {
+    headers = rows[0].map((c, i) => String(c || `Col ${i+1}`).trim());
+    dataRows = rows.slice(1);
+  } else {
+    headers = rows[0].map((_, i) => `Columna ${i+1}`);
+    dataRows = rows;
+  }
+
+  importContext.headers = headers;
+  importContext.rows = dataRows;
+  importContext.mapping = autoDetectMapping(headers, dataRows);
+  renderImportPreview();
+}
+
+function autoDetectMapping(headers, rows) {
+  const m = { dueno: -1, fechaInicial: -1, fechaCheque: -1, capital: -1 };
+  const lower = headers.map(h => String(h).toLowerCase());
+
+  lower.forEach((h, i) => {
+    if (m.dueno === -1 && /(dueño|dueno|librador|contraparte|deudor|cliente|raz[oó]n|firmante|emisor)/.test(h)) m.dueno = i;
+    if (m.fechaInicial === -1 && /(fecha\s*ini|inicio|origen|emisi|operaci)/.test(h)) m.fechaInicial = i;
+    if (m.fechaCheque === -1 && /(cheque|vencim|cobro|diferid|pago|fecha\s*fin)/.test(h)) m.fechaCheque = i;
+    if (m.capital === -1 && /(capital|monto|importe|valor|nominal)/.test(h)) m.capital = i;
+  });
+
+  if (m.fechaCheque === -1) {
+    lower.forEach((h, i) => { if (m.fechaCheque === -1 && /fecha/.test(h) && i !== m.fechaInicial) m.fechaCheque = i; });
+  }
+
+  if (m.capital === -1 || m.fechaCheque === -1) {
+    const sample = rows.slice(0, Math.min(5, rows.length));
+    const colTypes = headers.map((_, ci) => {
+      let nums = 0, dates = 0;
+      sample.forEach(r => {
+        const v = r[ci];
+        if (parseDate(v)) dates++;
+        else if (parseNumber(v) !== null) nums++;
+      });
+      return { ci, nums, dates };
+    });
+    if (m.capital === -1) {
+      const best = colTypes.filter(c => c.nums > 0).sort((a,b)=>b.nums-a.nums)[0];
+      if (best) m.capital = best.ci;
+    }
+    if (m.fechaCheque === -1) {
+      const dateCols = colTypes.filter(c => c.dates > 0 && c.ci !== m.fechaInicial).sort((a,b)=>b.dates-a.dates);
+      if (dateCols[0]) m.fechaCheque = dateCols[0].ci;
+      if (dateCols[1] && m.fechaInicial === -1) m.fechaInicial = dateCols[1].ci;
+    }
+  }
+  return m;
+}
+
+const SPANISH_MONTHS = {
+  ene: 0, jan: 0, enero: 0,
+  feb: 1, febrero: 1,
+  mar: 2, marzo: 2,
+  abr: 3, apr: 3, abril: 3,
+  may: 4, mayo: 4,
+  jun: 5, junio: 5,
+  jul: 6, julio: 6,
+  ago: 7, aug: 7, agosto: 7,
+  sep: 8, set: 8, septiembre: 8, setiembre: 8,
+  oct: 9, octubre: 9,
+  nov: 10, noviembre: 10,
+  dic: 11, dec: 11, diciembre: 11
+};
+
+function parseDate(v) {
+  if (v === null || v === undefined || v === '') return null;
+  if (v instanceof Date && !isNaN(v)) return v.toISOString().slice(0, 10);
+  const s = String(v).trim();
+  const abbrMatch = s.toLowerCase().match(/^(\d{1,2})[\-\s\/\.]?(ene|enero|jan|feb|febrero|mar|marzo|abr|apr|abril|may|mayo|jun|junio|jul|julio|ago|aug|agosto|sep|set|septiembre|setiembre|oct|octubre|nov|noviembre|dic|dec|diciembre)\.?(?:[\-\s\/\.]?(\d{2,4}))?/);
+  if (abbrMatch) {
+    const day = +abbrMatch[1];
+    const mIdx = SPANISH_MONTHS[abbrMatch[2]];
+    if (mIdx !== undefined && day >= 1 && day <= 31) {
+      let year = abbrMatch[3] ? +abbrMatch[3] : new Date().getFullYear();
+      if (year < 100) year += 2000;
+      let dt = new Date(year, mIdx, day);
+      if (!abbrMatch[3]) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (dt < today) dt = new Date(year + 1, mIdx, day);
+      }
+      if (!isNaN(dt)) return dt.toISOString().slice(0, 10);
+    }
+  }
+  const isoMatch = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoMatch) {
+    const d = new Date(+isoMatch[1], +isoMatch[2]-1, +isoMatch[3]);
+    if (!isNaN(d)) return d.toISOString().slice(0,10);
+  }
+  const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+  if (dmy) {
+    let [_, d, mo, y] = dmy;
+    if (y.length === 2) y = +y < 50 ? '20'+y : '19'+y;
+    const dt = new Date(+y, +mo-1, +d);
+    if (!isNaN(dt)) return dt.toISOString().slice(0,10);
+  }
+  const parsed = new Date(s);
+  if (!isNaN(parsed)) return parsed.toISOString().slice(0,10);
+  return null;
+}
+
+function parseNumber(v) {
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v === 'number') return v;
+  let s = String(v).trim().replace(/[$\s]/g, '');
+  if (!s) return null;
+  // Handle "1.234.567,89" (es-AR) and "1,234,567.89" (en-US)
+  if (/^-?\d{1,3}(\.\d{3})+,\d+$/.test(s)) s = s.replace(/\./g, '').replace(',', '.');
+  else if (/^-?\d{1,3}(,\d{3})+\.\d+$/.test(s)) s = s.replace(/,/g, '');
+  else if (/^-?\d+,\d+$/.test(s)) s = s.replace(',', '.');
+  else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+  else if (/^-?\d{1,3}(,\d{3})+$/.test(s)) s = s.replace(/,/g, '');
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+function renderImportPreview() {
+  const { headers, rows, mapping } = importContext;
+  const opts = ['<option value="-1">— ignorar —</option>'].concat(
+    headers.map((h, i) => `<option value="${i}">${h}</option>`)
+  ).join('');
+
+  const mapHtml = `
+    <div class="mapping-grid">
+      <div class="field">
+        <label>Dueño / Contraparte</label>
+        <select onchange="importContext.mapping.dueno=+this.value;renderImportPreview()">${opts.replace(`value="${mapping.dueno}"`, `value="${mapping.dueno}" selected`)}</select>
+      </div>
+      <div class="field">
+        <label>Fecha Inicial</label>
+        <select onchange="importContext.mapping.fechaInicial=+this.value;renderImportPreview()">${opts.replace(`value="${mapping.fechaInicial}"`, `value="${mapping.fechaInicial}" selected`)}</select>
+      </div>
+      <div class="field">
+        <label>Fecha Cheque</label>
+        <select onchange="importContext.mapping.fechaCheque=+this.value;renderImportPreview()">${opts.replace(`value="${mapping.fechaCheque}"`, `value="${mapping.fechaCheque}" selected`)}</select>
+      </div>
+      <div class="field">
+        <label>Capital</label>
+        <select onchange="importContext.mapping.capital=+this.value;renderImportPreview()">${opts.replace(`value="${mapping.capital}"`, `value="${mapping.capital}" selected`)}</select>
+      </div>
+      <div class="field">
+        <label>Fecha Inicial por defecto (si no hay columna)</label>
+        <input type="date" id="default-fecha-ini" value="${todayISO()}">
+      </div>
+      <div class="field">
+        <label>Dueño por defecto (si no hay columna)</label>
+        <input type="text" id="default-dueno" placeholder="Ej: AYSA" value="">
+      </div>
+    </div>
+  `;
+
+  const preview = rows.slice(0, 50).map((r, idx) => {
+    const dueno = mapping.dueno >= 0 ? String(r[mapping.dueno] || '').trim() : '';
+    const fi = mapping.fechaInicial >= 0 ? parseDate(r[mapping.fechaInicial]) : todayISO();
+    const fc = mapping.fechaCheque >= 0 ? parseDate(r[mapping.fechaCheque]) : null;
+    const cap = mapping.capital >= 0 ? parseNumber(r[mapping.capital]) : null;
+    const bad = !fc || !cap;
+    return `
+      <tr class="${bad ? 'bad' : ''}">
+        <td>${idx + 1}</td>
+        <td>${dueno || '—'}</td>
+        <td>${fi || '—'}</td>
+        <td>${fc || '<i>?</i>'}</td>
+        <td style="text-align:right">${cap !== null ? fmt(cap) : '<i>?</i>'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const validCount = rows.filter(r => {
+    const fc = mapping.fechaCheque >= 0 ? parseDate(r[mapping.fechaCheque]) : null;
+    const cap = mapping.capital >= 0 ? parseNumber(r[mapping.capital]) : null;
+    return fc && cap;
+  }).length;
+
+  document.getElementById('import-preview').innerHTML = `
+    ${mapHtml}
+    <div style="font-size:12px;color:var(--gray-700);margin-bottom:8px">
+      Detectadas <b>${rows.length}</b> filas · Válidas: <b style="color:var(--green)">${validCount}</b>${rows.length > 50 ? ` · Mostrando primeras 50` : ''}
+    </div>
+    <table class="preview-table">
+      <thead><tr><th>#</th><th>Dueño</th><th>Fecha Inicial</th><th>Fecha Cheque</th><th>Capital</th></tr></thead>
+      <tbody>${preview}</tbody>
+    </table>
+  `;
+  document.getElementById('btn-import').disabled = validCount === 0;
+}
+
+function confirmImport() {
+  const { entityId, rows, mapping } = importContext;
+  const defaultFI = document.getElementById('default-fecha-ini')?.value || todayISO();
+  const defaultDueno = (document.getElementById('default-dueno')?.value || '').trim();
+  const newChecks = [];
+  let fixed = 0;
+  rows.forEach(r => {
+    const dueno = mapping.dueno >= 0 ? String(r[mapping.dueno] || '').trim() || defaultDueno : defaultDueno;
+    let fi = mapping.fechaInicial >= 0 ? parseDate(r[mapping.fechaInicial]) : defaultFI;
+    const fc = mapping.fechaCheque >= 0 ? parseDate(r[mapping.fechaCheque]) : null;
+    const cap = mapping.capital >= 0 ? parseNumber(r[mapping.capital]) : null;
+    if (fc && cap) {
+      if (!fi) fi = defaultFI;
+      if (new Date(fc) < new Date(fi)) {
+        if (new Date(defaultFI) <= new Date(fc)) {
+          fi = defaultFI;
+        } else {
+          fi = fc;
+        }
+        fixed++;
+      }
+      newChecks.push({
+        id: uid(),
+        logicalId: uid(),
+        dueno,
+        fechaInicial: fi,
+        fechaCheque: fc,
+        capital: cap
+      });
+    }
+  });
+  if (fixed > 0) {
+    console.log(`${fixed} cheque(s) corregidos: fecha inicial > fecha cheque, ajustada automáticamente.`);
+  }
+  if (newChecks.length === 0) { alert('No hay filas válidas para importar.'); return; }
+  const entity = state.entities.find(e => e.id === entityId);
+  const target = state.syncedMode ? 'TODAS las entidades (modo Comparativa activo)' : `"${entity.name}"`;
+  const replace = entity.checks.length > 0
+    ? confirm(`Importar ${newChecks.length} cheques en ${target}.\n${entity.name} tiene ${entity.checks.length} cheques actuales. ¿Reemplazar?\n\nOK = Reemplazar · Cancelar = Agregar al final`)
+    : true;
+  entity.checks = replace ? newChecks : entity.checks.concat(newChecks);
+  syncChecks(entityId);
+  save();
+  closeModal();
+  render();
+}
+
+function printPDF() {
+  if (state.entities.length === 0) { alert('No hay datos para imprimir.'); return; }
+
+  const ranked = state.entities
+    .map(e => ({ entity: e, totals: entityTotals(e) }))
+    .filter(x => x.totals.totCapital > 0)
+    .sort((a, b) => {
+      if (!isFinite(a.totals.cftPond)) return 1;
+      if (!isFinite(b.totals.cftPond)) return -1;
+      return a.totals.cftPond - b.totals.cftPond;
+    });
+  const bestCft = ranked[0] ? ranked[0].totals.cftPond : NaN;
+
+  const dateStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const timeStr = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+
+  const anyPerc = ranked.some(r => r.totals.totPercDirect > 0);
+  const bestEntity = ranked[0];
+  const worstEntity = ranked.length > 1 ? ranked[ranked.length - 1] : null;
+  const maxSavingsNeto = (bestEntity && worstEntity) ? (bestEntity.totals.totNeto - worstEntity.totals.totNeto) : 0;
+  const percEntities = ranked.filter(r => r.totals.totPercDirect > 0);
+  const percGanancia = percEntities.reduce((sum, r) => sum + r.totals.totPercDirect, 0);
+  const allCarterasMatch = ranked.length < 2 || ranked.slice(1).every(r => checksMatch(ranked[0].entity.checks, r.entity.checks));
+
+  const bestPercFee = bestEntity ? bestEntity.totals.totPercDirect : 0;
+  const worstPercFee = worstEntity ? worstEntity.totals.totPercDirect : 0;
+  const bestNetoGrupo = bestEntity ? bestEntity.totals.totNeto + bestPercFee : 0;
+  const worstNetoGrupo = worstEntity ? worstEntity.totals.totNeto + worstPercFee : 0;
+  const ahorroGrupo = bestNetoGrupo - worstNetoGrupo;
+  const showPercLine = bestPercFee > 0 || worstPercFee > 0;
+
+  const highlightsHtml = (bestEntity ? `
+    <div class="highlights">
+      <div class="kpi">
+        <div class="kpi-label">★ Ahorro vs ${worstEntity ? worstEntity.entity.name : '—'}</div>
+        <div class="kpi-value">+ $ ${fmt(maxSavingsNeto)}</div>
+        <div class="kpi-sub">Ahorro de <b>${clientLabel()}</b> eligiendo <b>${bestEntity.entity.name}</b>${!allCarterasMatch ? ' · <i>carteras distintas, referencial</i>' : ''}</div>
+        ${showPercLine ? `
+          <div class="kpi-divider"></div>
+          <div class="kpi-line perc-line">
+            <span>↻ Fee MCI (${bestEntity.entity.name}${bestPercFee > 0 ? '' : ' — no aporta'})</span>
+            <b>${bestPercFee >= worstPercFee ? '+ $ ' + fmt(bestPercFee - worstPercFee) : '− $ ' + fmt(worstPercFee - bestPercFee)}</b>
+          </div>
+          ${worstPercFee > 0 ? `
+            <div class="kpi-line perc-line" style="opacity:0.7;font-size:10px">
+              <span style="font-style:italic">(${worstEntity.entity.name} aportaba al Grupo · se pierde si elegís ${bestEntity.entity.name})</span>
+              <span></span>
+            </div>
+          ` : ''}
+          <div class="kpi-line grupo-line">
+            <span>= Ahorro Total Grupo MCI</span>
+            <b>${ahorroGrupo >= 0 ? '+ $ ' + fmt(ahorroGrupo) : '− $ ' + fmt(Math.abs(ahorroGrupo))}</b>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  ` : '');
+
+  const rankingRows = ranked.map((r, i) => {
+    const isWinner = i === 0;
+    const dCft = isFinite(r.totals.cftPond) && isFinite(bestCft) ? (r.totals.cftPond - bestCft) : NaN;
+    const cost = r.totals.totCapital - r.totals.totNeto;
+    const e = r.entity;
+    const netoGrupo = r.totals.totNeto + r.totals.totPercDirect;
+    return `
+      <tr class="${isWinner ? 'winner-row' : ''}">
+        <td class="rank">${isWinner ? '★ MEJOR' : '#' + (i + 1)}</td>
+        <td class="left"><b>${e.name}</b></td>
+        <td>${fmtPct((r.totals.tnaPond || 0) / 100)}${r.totals.hasAnyOverride ? '*' : ''}</td>
+        <td>${(e.iva ?? IVA_DEFAULT)}%</td>
+        <td>${(e.iibb ?? IIBB_DEFAULT)}%</td>
+        <td>${(e.impCheque ?? IMP_CHEQUE_DEFAULT)}%</td>
+        <td>${(e.sircreb ?? SIRCREB_DEFAULT)}%</td>
+        <td>${(e.percDirect ?? 0)}%</td>
+        <td>${e.checks.length}</td>
+        <td>$ ${fmt(r.totals.totCapital)}</td>
+        <td>$ ${fmt(cost)}</td>
+        <td class="neto-cell">$ ${fmt(r.totals.totNeto)}</td>
+        ${anyPerc ? `<td class="grupo-cell">${r.totals.totPercDirect > 0 ? '+ $ ' + fmt(r.totals.totPercDirect) : '$ 0,00'}</td>` : ''}
+        ${anyPerc ? `<td class="grupo-cell"><b>$ ${fmt(netoGrupo)}</b></td>` : ''}
+        <td class="cft-cell">${fmtPct(r.totals.cftPond)}</td>
+        <td>${isWinner ? '—' : '+' + fmtPct(dCft)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const entitySections = ranked.map((r, idx) => {
+    const e = r.entity;
+    const ivaPct = effectiveRate(e, 'iva');
+    const iibbPct = effectiveRate(e, 'iibb');
+    const impPct = effectiveRate(e, 'impCheque');
+    const sircrebPct = effectiveRate(e, 'sircreb');
+    const percPct = effectiveRate(e, 'perc');
+    const isWinner = idx === 0;
+    const rows = e.checks.map(c => {
+      const rr = calcRow(c, e.tna, ivaPct, impPct, percPct, iibbPct, sircrebPct);
+      return `
+        <tr>
+          <td class="left">${(c.dueno || '—').replace(/</g, '&lt;')}</td>
+          <td class="left">${formatFecha(c.fechaInicial)}</td>
+          <td class="left">${formatFecha(c.fechaCheque)}</td>
+          <td><b>$ ${fmt(rr.capital)}</b></td>
+          <td>${rr.dias}</td>
+          <td>${fmt(rr.intereses)}</td>
+          <td>${fmt(rr.iva)}</td>
+          <td>${fmt(rr.ivaIC)}</td>
+          <td>${fmt(rr.iibb)}</td>
+          <td>${fmt(rr.impCheque)}</td>
+          <td>${fmt(rr.sircreb)}</td>
+          <td>${fmt(rr.percDirect)}</td>
+          <td class="neto-cell">$ ${fmt(rr.neto)}</td>
+          <td>${fmtPct((rr.effectiveTnaPct||0)/100)}</td>
+          <td class="cft-cell">${fmtPct(rr.cft)}</td>
+        </tr>
+      `;
+    }).join('');
+    return `
+      <div class="entity-section">
+        <div class="entity-title">
+          <span class="entity-name">${e.name}</span>
+          ${isWinner ? '<span class="winner-tag">★ MEJOR OPCIÓN</span>' : ''}
+          <span class="params">${tnaLabel(e)} ${e.tna}% · IVA ${ivaPct}% · IIBB ${iibbPct}% · Imp.Cheque ${impPct}% · SIRCREB ${sircrebPct}% · MCI ${percPct}%</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th class="left">Dueño</th>
+              <th class="left">F. Inicial</th>
+              <th class="left">F. Cheque</th>
+              <th>Capital</th>
+              <th>Días</th>
+              <th>Intereses</th>
+              <th>IVA</th>
+              <th>IVA IC</th>
+              <th>IIBB</th>
+              <th>Imp.Cheque</th>
+              <th>SIRCREB</th>
+              <th>MCI</th>
+              <th>NETO</th>
+              <th>TNA</th>
+              <th>CFT</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr>
+              <td class="left" colspan="3"><b>TOTAL ${e.name}</b></td>
+              <td><b>$ ${fmt(r.totals.totCapital)}</b></td>
+              <td>—</td>
+              <td>${fmt(r.totals.totIntereses)}</td>
+              <td>${fmt(r.totals.totIVA)}</td>
+              <td>${fmt(r.totals.totIVAIC)}</td>
+              <td>${fmt(r.totals.totIIBB)}</td>
+              <td>${fmt(r.totals.totImpCheque)}</td>
+              <td>${fmt(r.totals.totSircreb)}</td>
+              <td>${fmt(r.totals.totPercDirect)}</td>
+              <td class="neto-cell"><b>$ ${fmt(r.totals.totNeto)}</b></td>
+              <td>${fmtPct((r.totals.tnaPond || 0) / 100)}</td>
+              <td class="cft-cell"><b>${fmtPct(r.totals.cftPond)}</b></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    `;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Comparativa Descuento Cheques${state.clientName ? ' · ' + state.clientName : ''} · MCI · ${dateStr}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4 landscape; margin: 20mm 18mm 15mm 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: #0a1530; font-size: 9.5px; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+  @media screen { body { padding: 32px 40px; max-width: 1400px; margin: 0 auto; } }
+  .header { border-bottom: 2px solid #0a1530; padding-bottom: 14px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
+  .header .eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #0a1530; margin-bottom: 6px; }
+  .header h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; color: #0a1530; }
+  .header h1 .serif { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 500; }
+  .header .meta { font-size: 9px; color: #555; margin-top: 6px; }
+  .header .right { text-align: right; }
+  .perc-mark { font-family: 'Inter', sans-serif; font-weight: 900; font-size: 26px; letter-spacing: -0.05em; color: #0a1530; line-height: 1; display: inline-flex; align-items: baseline; }
+  .perc-mark .dot { width: 5px; height: 5px; background: #0a1530; border-radius: 50%; display: inline-block; margin-left: 2px; margin-bottom: 2px; }
+  .perc-tagline { font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase; color: #555; margin-top: 6px; font-weight: 600; }
+  h2 { font-size: 11px; margin: 20px 0 8px; color: #0a1530; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 1px solid #d1d5db; padding-bottom: 5px; }
+  h2 .serif-h2 { font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-weight: 500; text-transform: none; letter-spacing: 0; color: #1a2548; }
+  table { width: 100%; border-collapse: collapse; font-size: 9px; margin-bottom: 4px; }
+  th { background: #eaeaf5; color: #0a1530; padding: 6px 5px; text-align: right; font-weight: 700; border: 1px solid #c8c8d6; font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+  th.left { text-align: left; }
+  td { padding: 5px 5px; text-align: right; border: 1px solid #e5e7eb; font-variant-numeric: tabular-nums; }
+  td.left { text-align: left; }
+  td.rank { font-weight: 700; }
+  .winner-row { background: #f0fdf4; }
+  .winner-row td.rank { color: #16a34a; }
+  .winner-row td.cft-cell { color: #16a34a; font-weight: 800; }
+  .neto-cell { background: #fffbeb; font-weight: 700; }
+  .grupo-cell { background: #f0fdf4; color: #047857; font-weight: 600; }
+  .cft-cell { color: #16a34a; font-weight: 700; }
+  .highlights { display: flex; gap: 14px; margin: 22px 0 18px; }
+  .kpi { flex: 1; padding: 18px 22px; border-radius: 12px; border: 1.5px solid; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #d97706; }
+  .kpi-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.22em; font-weight: 700; color: #b45309; }
+  .kpi-value { font-size: 32px; font-weight: 800; margin: 6px 0 2px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1; color: #b45309; }
+  .kpi-sub { font-size: 10px; color: #4b5563; font-weight: 500; line-height: 1.5; }
+  .kpi-sub b { color: #0a1530; }
+  .kpi-divider { border-top: 1px dashed #d97706; margin: 12px 0 8px; }
+  .kpi-line { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 11px; font-variant-numeric: tabular-nums; }
+  .kpi-line.perc-line { color: #047857; }
+  .kpi-line.perc-line b { color: #16a34a; }
+  .kpi-line.grupo-line { font-size: 14px; font-weight: 700; color: #047857; padding: 6px 0 2px; border-top: 1px solid #16a34a; margin-top: 4px; }
+  .kpi-line.grupo-line b { color: #16a34a; font-size: 16px; }
+  tfoot td { background: #eaeaf5; font-weight: 700; }
+  tfoot td.cft-cell { color: #0a1530; }
+  .entity-section { margin-top: 18px; page-break-inside: avoid; }
+  .entity-title { font-size: 12px; font-weight: 700; color: #0a1530; padding: 7px 12px; background: #eaeaf5; border-left: 4px solid #0a1530; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .entity-title .entity-name { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
+  .entity-title .winner-tag { font-size: 9px; background: #16a34a; color: white; padding: 2px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.05em; }
+  .entity-title .params { font-size: 9px; color: #4b5563; font-weight: 500; margin-left: auto; }
+  .footer-meta { margin-top: 28px; padding-top: 10px; border-top: 1px solid #d1d5db; font-size: 8px; color: #888; text-align: center; line-height: 1.6; }
+  .footer-meta b { color: #0a1530; }
+  .summary-note { font-size: 8.5px; margin-top: 6px; color: #6b7280; font-style: italic; }
+  @media print { .print-controls { display: none; } body { padding: 0; } }
+  .print-controls { position: fixed; top: 12px; right: 12px; background: white; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100; }
+  .print-controls button { background: #0a1530; color: white; border: none; padding: 6px 14px; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<div class="print-controls">
+  <button onclick="window.print()">Imprimir / Guardar PDF</button>
+</div>
+
+<div class="header">
+  <div>
+    <div class="eyebrow">Descuento de Cheques · Tesorería</div>
+    <h1>${state.clientName ? '<span class="serif">' + state.clientName + '</span> · Comparativa' : 'Comparativa <span class="serif">para Tesorería</span>'}.</h1>
+    <div class="meta">Generado el ${dateStr} a las ${timeStr}${state.syncedMode ? ' · Modo Comparativa Sincronizada' : ''}</div>
+  </div>
+  <div class="right">
+    <div class="perc-mark">MCI<span class="dot"></span></div>
+    <div class="perc-tagline">Mercado de Capitales · Inversiones</div>
+  </div>
+</div>
+
+${highlightsHtml}
+
+<h2>Ranking de Entidades — <span class="serif-h2">de mejor a peor</span></h2>
+${anyPerc ? `<div style="background:#f0fdf4;border-left:3px solid #16a34a;padding:8px 12px;margin-bottom:10px;font-size:9.5px;border-radius:4px"><b style="color:#047857">↻ Vista Consolidada Grupo MCI:</b> el costo MCI Direct (0,2% en MOMENTUM) retorna al Grupo MCI. La columna <b>NETO Grupo</b> = NETO Cliente + Ingreso MCI, refleja cuánto se queda dentro del grupo.</div>` : ''}
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th class="left">Entidad</th>
+      <th>TNA</th>
+      <th>IVA</th>
+      <th>IIBB</th>
+      <th>Imp.Cheque</th>
+      <th>SIRCREB</th>
+      <th>MCI</th>
+      <th>Cheques</th>
+      <th>Capital Total</th>
+      <th>Total Costos</th>
+      <th>NETO ${clientLabel()}</th>
+      ${anyPerc ? '<th>Ingreso MCI</th>' : ''}
+      ${anyPerc ? '<th>NETO Grupo</th>' : ''}
+      <th>TNA Efectiva</th>
+      <th>Δ vs Mejor</th>
+    </tr>
+  </thead>
+  <tbody>${rankingRows}</tbody>
+</table>
+${ranked.some(r => r.totals.hasAnyOverride) ? '<div class="summary-note">* TNA ponderada por capital (algunos cheques tienen TNA específica por plazo)</div>' : ''}
+
+<h2>Detalle por Entidad</h2>
+${entitySections}
+
+<div class="footer-meta">
+  <b>MCI</b> · Comparador de Financiamiento · Comparador de financiamiento vía ALYC o banco. CFT calculada con IVA Intercompany (50% del IVA).<br>
+  Fórmulas: Intereses = Capital × TNA × Días/365 · IVA = Intereses × Alícuota · IIBB = Intereses × Alícuota · Imp.Cheque = Subtotal × Alícuota · SIRCREB = (Capital − Intereses) × Alícuota · MCI Direct = Capital × Alícuota · NETO = Capital − todos los costos · CFT = TotalCostos / Capital × 365/Días (con IVA IC). Si todas las alícuotas son 0 → CFT = TNA.
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => { window.focus(); window.print(); }, 400);
+  });
+<\/script>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  if (!win) { alert('El navegador bloqueó la ventana emergente. Permití pop-ups y reintentá.'); return; }
+  win.document.write(html);
+  win.document.close();
+}
+
+function exportExcel() {
+  if (state.entities.length === 0) { alert('No hay datos para exportar.'); return; }
+  const wb = XLSX.utils.book_new();
+
+  const head = ['Entidad', 'TNA %', 'IVA %', 'IIBB %', 'Imp.Cheque %', 'SIRCREB %', 'MCI %', 'Dueño', 'Fecha Inicial', 'Fecha Cheque', 'Capital', 'Días', 'Intereses', 'IVA', 'IVA IC (50%)', 'IIBB', 'Imp.Cheque', 'SIRCREB', 'MCI Direct', 'NETO', 'TNA %', 'TNA Ef. %', 'TNA Ef. − TNA (pp)'];
+  const chequesData = [head];
+  state.entities.forEach(e => {
+    const ivaRate = effectiveRate(e, 'iva');
+    const iibbRate = effectiveRate(e, 'iibb');
+    const impRate = effectiveRate(e, 'impCheque');
+    const sircrebRate = effectiveRate(e, 'sircreb');
+    const percRate = effectiveRate(e, 'perc');
+    e.checks.forEach(c => {
+      const r = calcRow(c, e.tna, ivaRate, impRate, percRate, iibbRate, sircrebRate);
+      const spread = isFinite(r.tnaEfectiva) ? r.tnaEfectiva * 100 - r.effectiveTnaPct : '';
+      chequesData.push([
+        e.name, e.tna, ivaRate, iibbRate, impRate, sircrebRate, percRate, c.dueno || '', c.fechaInicial, c.fechaCheque,
+        round2(r.capital), r.dias, round2(r.intereses), round2(r.iva), round2(r.ivaIC),
+        round2(r.iibb), round2(r.impCheque), round2(r.sircreb), round2(r.percDirect), round2(r.neto),
+        r.effectiveTnaPct, isFinite(r.tnaEfectiva) ? round2(r.tnaEfectiva * 100) : '', spread === '' ? '' : round2(spread)
+      ]);
+    });
+    const t = entityTotals(e);
+    const spreadTot = isFinite(t.tnaEfectivaPond) ? t.tnaEfectivaPond * 100 - t.tnaPond : '';
+    chequesData.push([
+      `TOTAL ${e.name}`, '', '', '', '', '', '', '', '', '',
+      round2(t.totCapital), '', round2(t.totIntereses), round2(t.totIVA), round2(t.totIVAIC),
+      round2(t.totIIBB), round2(t.totImpCheque), round2(t.totSircreb), round2(t.totPercDirect), round2(t.totNeto),
+      round2(t.tnaPond), isFinite(t.cftPond) ? round2(t.cftPond * 100) : '', spreadTot === '' ? '' : round2(spreadTot)
+    ]);
+    chequesData.push([]);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet(chequesData);
+  ws1['!cols'] = [{wch:14},{wch:7},{wch:7},{wch:8},{wch:10},{wch:10},{wch:8},{wch:14},{wch:12},{wch:12},{wch:14},{wch:6},{wch:12},{wch:12},{wch:13},{wch:11},{wch:14},{wch:11},{wch:11},{wch:14},{wch:8},{wch:9},{wch:13}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Cheques');
+
+  const ranked = state.entities
+    .map(e => ({ entity: e, totals: entityTotals(e) }))
+    .filter(x => x.totals.totCapital > 0 && isFinite(x.totals.tnaEfectivaPond))
+    .sort((a, b) => a.totals.cftPond - b.totals.cftPond);
+
+  const compData = [];
+  compData.push(['RANKING — Mejor opción primero (menor CFT)']);
+  compData.push([]);
+  compData.push(['Pos', 'Entidad', 'TNA %', 'IVA %', 'Cheques', 'Capital', 'Total Intereses', 'Total IVA', 'Total NETO', 'TNA Ef. %', 'Δ TNA Ef. vs Mejor (pp)', 'Δ NETO vs Mejor ($)']);
+  const best = ranked[0];
+  ranked.forEach((r, i) => {
+    const dCft = (r.totals.cftPond - (best?.totals.cftPond || 0)) * 100;
+    const dNeto = r.totals.totNeto - (best?.totals.totNeto || 0);
+    compData.push([
+      i === 0 ? 'MEJOR' : (i + 1),
+      r.entity.name,
+      r.entity.tna,
+      r.entity.iva ?? 10.5,
+      r.entity.checks.length,
+      round2(r.totals.totCapital),
+      round2(r.totals.totIntereses),
+      round2(r.totals.totIVA),
+      round2(r.totals.totNeto),
+      round2(r.totals.tnaEfectivaPond * 100),
+      i === 0 ? '—' : round2(dCft),
+      i === 0 ? '—' : round2(dNeto)
+    ]);
+  });
+
+  compData.push([]);
+  compData.push([]);
+  compData.push(['COMPARACIONES VS — Ahorro entre cada par']);
+  compData.push([]);
+  compData.push(['Ganador', 'Perdedor', 'CFT Ganador %', 'CFT Perdedor %', 'Δ CFT (pp)', 'NETO Ganador', 'NETO Perdedor', 'Ahorro NETO $', 'Ahorro %', 'Costo/Cap Ganador %', 'Costo/Cap Perdedor %', 'Capitales Iguales']);
+  for (let i = 0; i < ranked.length; i++) {
+    for (let j = i + 1; j < ranked.length; j++) {
+      const a = ranked[i], b = ranked[j];
+      const winner = a.totals.cftPond <= b.totals.cftPond ? a : b;
+      const loser = winner === a ? b : a;
+      const dCft = (loser.totals.cftPond - winner.totals.cftPond) * 100;
+      const dNeto = winner.totals.totNeto - loser.totals.totNeto;
+      const pctSavings = loser.totals.totNeto > 0 ? (dNeto / loser.totals.totNeto) * 100 : 0;
+      const sameCap = Math.abs(a.totals.totCapital - b.totals.totCapital) < 1;
+      const costPctW = winner.totals.totCapital > 0 ? ((winner.totals.totCapital - winner.totals.totNeto) / winner.totals.totCapital) * 100 : 0;
+      const costPctL = loser.totals.totCapital > 0 ? ((loser.totals.totCapital - loser.totals.totNeto) / loser.totals.totCapital) * 100 : 0;
+      compData.push([
+        winner.entity.name, loser.entity.name,
+        round2(winner.totals.cftPond * 100), round2(loser.totals.cftPond * 100),
+        round2(dCft),
+        round2(winner.totals.totNeto), round2(loser.totals.totNeto),
+        sameCap ? round2(dNeto) : '—',
+        sameCap ? round2(pctSavings) : '—',
+        round2(costPctW), round2(costPctL),
+        sameCap ? 'SI' : 'NO'
+      ]);
+    }
+  }
+
+  compData.push([]);
+  compData.push([]);
+  compData.push(['FÓRMULAS']);
+  compData.push(['Intereses', '= Capital × TNA × Días / 365']);
+  compData.push(['IVA', '= Intereses × IVA% (default 10.5%)']);
+  compData.push(['IVA IC (50%)', '= IVA / 2 — único componente de IVA considerado para CFT']);
+  compData.push(['IIBB', '= Intereses × 0.1%']);
+  compData.push(['Imp.Cheque', '= (Capital − Int − IVA − IIBB) × 0.6%']);
+  compData.push(['NETO', '= Capital − Intereses − IVA − IIBB − Imp.Cheque (lo que cobrás)']);
+  compData.push(['NETO_CFT', '= Capital − Intereses − IVA IC − IIBB − Imp.Cheque (usando solo 50% del IVA)']);
+  compData.push(['CFT', '= (Capital / NETO_CFT)^(365/Días) − 1']);
+
+  const ws2 = XLSX.utils.aoa_to_sheet(compData);
+  ws2['!cols'] = [{wch:14},{wch:14},{wch:13},{wch:13},{wch:13},{wch:14},{wch:14},{wch:14},{wch:10},{wch:18},{wch:18},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Comparativo');
+
+  XLSX.writeFile(wb, `descuento-cheques-${todayISO()}.xlsx`);
+}
+
+function round2(n) {
+  if (!isFinite(n)) return '';
+  return Math.round(n * 100) / 100;
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `descuento-cheques-${todayISO()}.json`;
+  a.click();
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        state = JSON.parse(ev.target.result);
+        save();
+        render();
+      } catch (err) { alert('Archivo inválido'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function render() {
+  const toggle = document.getElementById('synced-toggle');
+  if (toggle) toggle.checked = !!state.syncedMode;
+  const toggleWrap = document.getElementById('sync-toggle-wrap');
+  if (toggleWrap) toggleWrap.classList.toggle('on', !!state.syncedMode);
+  const addBtn = document.getElementById('add-entity-btn');
+  if (addBtn) addBtn.textContent = state.syncedMode ? '+ Agregar Escenario' : '+ Agregar Entidad';
+  const clientInput = document.getElementById('client-name-input');
+  if (clientInput && document.activeElement !== clientInput) clientInput.value = state.clientName || '';
+  renderSummary();
+  renderComparison();
+  renderEntities();
+}
+
+function checksMatch(checksA, checksB) {
+  if (checksA.length !== checksB.length) return false;
+  const norm = arr => [...arr].map(c => `${c.fechaCheque}|${Math.round(+c.capital || 0)}`).sort();
+  const a = norm(checksA), b = norm(checksB);
+  return a.every((v, i) => v === b[i]);
+}
+
+function renderComparison() {
+  const el = document.getElementById('comparison');
+  const ranked = state.entities
+    .map(e => ({ entity: e, totals: entityTotals(e) }))
+    .filter(x => x.totals.totCapital > 0 && isFinite(effectiveRanking(x)))
+    .sort((a, b) => effectiveRanking(a) - effectiveRanking(b));
+
+  if (ranked.length < 2) {
+    el.innerHTML = ranked.length === 1
+      ? '<div class="legend" style="text-align:center">Agregá otra entidad para ver el comparativo VS y el ahorro entre opciones.</div>'
+      : '';
+    return;
+  }
+
+  const best = ranked[0];
+  const worst = ranked[ranked.length - 1];
+  const cftRange = effectiveRanking(worst) - effectiveRanking(best);
+
+  const anyPerc = ranked.some(r => r.totals.totPercDirect > 0);
+  const totalPercIncome = ranked.reduce((sum, r) => sum + r.totals.totPercDirect, 0);
+
+  let html = '<h2 class="section-title">Ranking · Menor TNA Efectiva Primero</h2>';
+  if (anyPerc) {
+    html += `<div style="background:linear-gradient(135deg,#f0fdf4 0%,#ecfeff 100%);border:1px solid var(--green);border-left:4px solid var(--green);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.5">
+      <b style="color:var(--green)">↻ Vista Consolidada Grupo MCI:</b> hay escenarios con <b>MCI Direct</b> (MOMENTUM como Proveedor Liquidador). Ese costo (0,2% × Capital) <b>retorna al Grupo MCI</b>. El "<b>NETO Grupo</b>" suma el NETO Cliente + el ingreso MCI y refleja cuánto se queda dentro del grupo en cada escenario.
+    </div>`;
+  }
+  html += '<div class="ranking">';
+  ranked.forEach((r, i) => {
+    const isWinner = i === 0;
+    const rLabel = effectiveRankingLabel(r);
+    const rValue = effectiveRanking(r);
+    const bestValue = effectiveRanking(best);
+    const dCft = rValue - bestValue;
+    const dNeto = r.totals.totNeto - best.totals.totNeto;
+    const fillPct = cftRange > 0 ? (1 - (dCft / cftRange)) * 100 : 100;
+    const hasPerc = r.totals.totPercDirect > 0;
+    const netoGrupo = r.totals.totNeto + r.totals.totPercDirect;
+    let diffHtml;
+    if (isWinner) {
+      diffHtml = `<div class="rank-diff best">★ MEJOR OPCIÓN · TNA Efectiva más baja</div>`;
+    } else {
+      const pctLoss = best.totals.totNeto > 0 ? (Math.abs(dNeto) / best.totals.totNeto) * 100 : 0;
+      diffHtml = `<div class="rank-diff bad">+${fmtPct(dCft)} TNA Ef. · pierde $ ${fmt(Math.abs(dNeto))} (${pctLoss.toFixed(2)}%)</div>`;
+    }
+    const percBlock = hasPerc ? `
+      <div style="margin-top:8px;padding:6px 10px;background:#f0fdf4;border-left:3px solid var(--green);border-radius:4px;font-size:10px;line-height:1.5">
+        <div style="display:flex;justify-content:space-between"><span style="color:#047857">↻ Ingreso MCI</span><b style="color:var(--green)">+ $ ${fmt(r.totals.totPercDirect)}</b></div>
+        <div style="display:flex;justify-content:space-between;margin-top:2px"><span style="color:#047857;font-weight:700">NETO Grupo</span><b style="color:var(--green);font-size:12px">$ ${fmt(netoGrupo)}</b></div>
+      </div>
+    ` : (anyPerc ? `
+      <div style="margin-top:8px;padding:6px 10px;background:var(--gray-50);border-left:3px solid var(--gray-300);border-radius:4px;font-size:10px;line-height:1.5;color:var(--gray-500)">
+        <div style="display:flex;justify-content:space-between"><span>Ingreso MCI</span><b>$ 0,00</b></div>
+        <div style="display:flex;justify-content:space-between;margin-top:2px"><span style="font-weight:700">NETO Grupo</span><b>$ ${fmt(netoGrupo)}</b></div>
+      </div>
+    ` : '');
+    const tnaHeaderHtml = `<div class="rank-tna-edit">
+          <span class="rank-tna-edit-label">${tnaLabel(r.entity)} cotizado</span>
+          <input type="number" step="0.01" value="${r.entity.tna}" onchange="updateEntity('${r.entity.id}','tna',this.value)" title="Editá la tasa, la TNA Efectiva recalcula al instante">
+          <span class="pct-sign">%</span>
+          <span class="rank-tna-edit-meta">· ${r.entity.checks.length} cheques</span>
+         </div>`;
+    html += `
+      <div class="rank-card ${isWinner ? 'winner' : ''}">
+        <div class="pos">${isWinner ? 'MEJOR' : '#' + (i + 1)}</div>
+        <div class="rank-name">${r.entity.name}</div>
+        ${tnaHeaderHtml}
+        <div class="rank-cft">${fmtPct(rValue)}</div>
+        <div class="rank-cft-label">TNA Efectiva ponderada</div>
+        <div class="rank-neto">NETO $ ${fmt(r.totals.totNeto)}</div>
+        ${percBlock}
+        <div class="bar"><div class="bar-fill" style="width:${fillPct}%"></div></div>
+        ${diffHtml}
+      </div>
+    `;
+  });
+  html += '</div>';
+
+  let marketHtml = `<details class="market-pill">
+    <summary>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Comparativa MERCADO · Ahorro entre Pares
+      <span class="market-count">${(ranked.length * (ranked.length - 1)) / 2} pares</span>
+      <span class="chevron">▾</span>
+    </summary>
+    <div style="margin-top:12px">
+  `;
+  marketHtml += '<div class="vs-grid">';
+  for (let i = 0; i < ranked.length; i++) {
+    for (let j = i + 1; j < ranked.length; j++) {
+      const a = ranked[i], b = ranked[j];
+      const winner = a.totals.cftPond <= b.totals.cftPond ? a : b;
+      const loser = winner === a ? b : a;
+      const dCft = loser.totals.cftPond - winner.totals.cftPond;
+      const dNeto = winner.totals.totNeto - loser.totals.totNeto;
+      const pctSavings = loser.totals.totNeto > 0 ? (dNeto / loser.totals.totNeto) * 100 : 0;
+      const sameCapital = Math.abs(a.totals.totCapital - b.totals.totCapital) < 1;
+      const sameChecks = checksMatch(a.entity.checks, b.entity.checks);
+      const costWinner = winner.totals.totCapital - winner.totals.totNeto;
+      const costLoser = loser.totals.totCapital - loser.totals.totNeto;
+      const costPctW = winner.totals.totCapital > 0 ? (costWinner / winner.totals.totCapital) * 100 : 0;
+      const costPctL = loser.totals.totCapital > 0 ? (costLoser / loser.totals.totCapital) * 100 : 0;
+      const costPctDiff = costPctL - costPctW;
+
+      marketHtml += `
+        <div class="vs-card">
+          <div class="vs-header">
+            <div class="vs-side win">
+              <div class="name">${winner.entity.name}</div>
+              <div class="meta">${tnaLabel(winner.entity)} ${winner.entity.tna}% cotizado · TNA Ef. ${fmtPct(effectiveRanking(winner))}</div>
+            </div>
+            <div class="vs-divider">VS</div>
+            <div class="vs-side lose">
+              <div class="name">${loser.entity.name}</div>
+              <div class="meta">${tnaLabel(loser.entity)} ${loser.entity.tna}% cotizado · TNA Ef. ${fmtPct(effectiveRanking(loser))}</div>
+            </div>
+          </div>
+          <div class="vs-body">
+            <div class="vs-row">
+              <span class="vs-label">Ahorro TNA Efectiva</span>
+              <span class="vs-value good big">−${fmtPct(dCft)}</span>
+            </div>
+            ${sameChecks ? `
+              <div class="vs-row">
+                <span class="vs-label">Ahorro $ NETO</span>
+                <span class="vs-value good big">${dNeto >= 0 ? '+ $ ' + fmt(dNeto) : '− $ ' + fmt(Math.abs(dNeto))}</span>
+              </div>
+              <div class="vs-row">
+                <span class="vs-label">Ahorro %</span>
+                <span class="vs-value ${dNeto >= 0 ? 'good' : ''}" style="${dNeto < 0 ? 'color:var(--red)' : ''}">${pctSavings.toFixed(2)}%</span>
+              </div>
+              ${(winner.totals.totPercDirect > 0 || loser.totals.totPercDirect > 0) ? (() => {
+                const winnerPerc = winner.totals.totPercDirect;
+                const loserPerc = loser.totals.totPercDirect;
+                const dPerc = winnerPerc - loserPerc;
+                const winnerNG = winner.totals.totNeto + winnerPerc;
+                const loserNG = loser.totals.totNeto + loserPerc;
+                const dNG = winnerNG - loserNG;
+                const percLabel = winnerPerc > 0 && loserPerc === 0
+                  ? `↻ Fee MCI aportado por <b>${winner.entity.name}</b>`
+                  : (loserPerc > 0 && winnerPerc === 0
+                    ? `↻ Fee MCI que se pierde (<b>${loser.entity.name}</b>)`
+                    : '↻ Δ Fee MCI entre ambas');
+                return `
+                  <div class="vs-row" style="border-top:1px dashed var(--green);padding-top:8px;margin-top:6px;background:#f0fdf4;margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px">
+                    <span class="vs-label" style="color:#047857;text-transform:none;font-size:11px">${percLabel}</span>
+                    <span class="vs-value" style="color:${dPerc >= 0 ? 'var(--green)' : 'var(--red)'};font-size:14px">${dPerc >= 0 ? '+ $ ' + fmt(dPerc) : '− $ ' + fmt(Math.abs(dPerc))}</span>
+                  </div>
+                  <div class="vs-row" style="background:#f0fdf4;margin-left:-12px;margin-right:-12px;padding-left:12px;padding-right:12px;padding-bottom:8px;border-top:1px solid var(--green)">
+                    <span class="vs-label" style="color:#047857;font-weight:700">= Ahorro NETO Grupo MCI</span>
+                    <span class="vs-value big" style="color:${dNG >= 0 ? 'var(--green)' : 'var(--red)'}">${dNG >= 0 ? '+ $ ' + fmt(dNG) : '− $ ' + fmt(Math.abs(dNG))}</span>
+                  </div>
+                `;
+              })() : ''}
+            ` : `
+              <div class="vs-row">
+                <span class="vs-label">Costo / Capital · ${winner.entity.name}</span>
+                <span class="vs-value">${costPctW.toFixed(2)}%</span>
+              </div>
+              <div class="vs-row">
+                <span class="vs-label">Costo / Capital · ${loser.entity.name}</span>
+                <span class="vs-value">${costPctL.toFixed(2)}%</span>
+              </div>
+              <div class="vs-row">
+                <span class="vs-label">Δ Costo normalizado</span>
+                <span class="vs-value ${costPctDiff >= 0 ? 'good' : ''}" style="${costPctDiff < 0 ? 'color:var(--red)' : ''}">${costPctDiff >= 0 ? '−' : '+'}${Math.abs(costPctDiff).toFixed(2)}pp</span>
+              </div>
+              <div class="vs-warn"><b>⚠ Carteras distintas</b> — las fechas/capitales no coinciden entre entidades, por eso la CFT puede ser mejor pero el NETO en $ peor (y viceversa). Usá <b>"Copiar cheques"</b> para evaluar la misma cartera en ambas.</div>
+            `}
+          </div>
+        </div>
+      `;
+    }
+  }
+  marketHtml += '</div></div></details>';
+
+  el.innerHTML = html;
+  const marketHost = document.getElementById('market-pill-host');
+  if (marketHost) marketHost.innerHTML = ranked.length >= 2 ? marketHtml : '';
+}
+
+function renderSummary() {
+  const el = document.getElementById('summary');
+  if (state.entities.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+  const cards = state.entities.map(e => {
+    const t = entityTotals(e);
+    const tnaEfClass = t.tnaEfectivaPond > 0.80 ? 'high' : '';
+    const hasPerc = t.totPercDirect > 0;
+    const netoGrupo = t.totNeto + t.totPercDirect;
+    return `
+      <div class="summary-card">
+        <h3>${e.name} · ${tnaLabel(e)} ${e.tna}%</h3>
+        <div class="row"><span class="label">Cheques</span><span class="value">${e.checks.length}</span></div>
+        <div class="row"><span class="label">Capital</span><span class="value">$ ${fmt(t.totCapital)}</span></div>
+        <div class="row"><span class="label">NETO</span><span class="value">$ ${fmt(t.totNeto)}</span></div>
+        ${hasPerc ? `
+          <div class="row" style="color:var(--green);font-size:11px"><span class="label">↻ Ingreso MCI</span><span class="value">+ $ ${fmt(t.totPercDirect)}</span></div>
+          <div class="row" style="font-weight:700;border-top:1px dashed var(--gray-200);padding-top:5px;margin-top:3px"><span class="label" style="color:var(--green)">NETO Grupo MCI</span><span class="value" style="color:var(--green)">$ ${fmt(netoGrupo)}</span></div>
+        ` : ''}
+        <div class="row cft"><span class="label">TNA Efectiva</span><span class="value">${fmtPct(t.tnaEfectivaPond)}</span></div>
+      </div>
+    `;
+  }).join('');
+  el.innerHTML = `
+    <details class="summary-pill">
+      <summary>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Resumen por Entidad
+        <span class="count-badge">${state.entities.length} entidades</span>
+        <span class="chevron">▾</span>
+      </summary>
+      <div class="summary-grid">${cards}</div>
+    </details>
+  `;
+}
+
+function renderEntities() {
+  const el = document.getElementById('entities');
+  if (state.entities.length === 0) {
+    el.innerHTML = '<div class="empty">No hay entidades cargadas. Agregá una para comenzar.</div>';
+    return;
+  }
+  const banner = state.syncedMode ? `
+    <div class="sync-banner">
+      <span class="icon">🔗</span>
+      <div>
+        <b>Modo Comparativa activado</b> — todos los escenarios usan la misma cartera de cheques.<br>
+        Editá cualquier cheque en cualquier escenario y los cambios se sincronizan automáticamente. Cada escenario solo cambia sus parámetros: <b>TNA · Sellos · IVA · D&C · Derechos</b>.
+      </div>
+    </div>
+  ` : '';
+  el.innerHTML = banner + state.entities.map(e => {
+    const t = entityTotals(e);
+    const tnaEfClass = t.tnaEfectivaPond > 0.80 ? 'high' : '';
+    return `
+      <div class="entity">
+        <div class="entity-header">
+          <div class="name">${e.name}${state.syncedMode ? '<span class="sync-badge">🔗 Sincronizada</span>' : ''}</div>
+          <div class="field" title="${isAllIn(e) ? 'All in: tasa que incluye todos los costos del mercado' : 'Tasa Nominal Anual'}">
+            <label>${tnaLabel(e)} %</label>
+            <input type="number" step="0.01" value="${e.tna}" onchange="updateEntity('${e.id}','tna',this.value)">
+          </div>
+          <div class="field" title="Imp. de Sellos: capital × % × días/365. Bancos: 1,2%. ALYC: 0%.">
+            <label>Sellos %</label>
+            <div class="field-row">
+              <input type="number" step="0.001" value="${e.sellos ?? 0}" onchange="updateEntity('${e.id}','sellos',this.value)" ${e.sellosAplica === false ? 'disabled class="disabled"' : ''}>
+              <button class="aplica-toggle ${e.sellosAplica === false ? 'off' : 'on'}" onclick="toggleAplica('${e.id}','sellos')" title="${e.sellosAplica === false ? 'No aplica · click para activar' : 'Aplica · click para desactivar'}">${e.sellosAplica === false ? '✕' : '✓'}</button>
+            </div>
+          </div>
+          <div class="field" title="IVA sobre (intereses + sellos + derechos). Bancos: 21%. ALYC: 0%.">
+            <label>IVA %</label>
+            <div class="field-row">
+              <input type="number" step="0.01" value="${e.iva ?? 0}" onchange="updateEntity('${e.id}','iva',this.value)" ${e.ivaAplica === false ? 'disabled class="disabled"' : ''}>
+              <button class="aplica-toggle ${e.ivaAplica === false ? 'off' : 'on'}" onclick="toggleAplica('${e.id}','iva')" title="${e.ivaAplica === false ? 'No aplica · click para activar' : 'Aplica · click para desactivar'}">${e.ivaAplica === false ? '✕' : '✓'}</button>
+            </div>
+          </div>
+          <div class="field" title="IIBB sobre base de gastos financieros (default 0%)">
+            <label>IIBB %</label>
+            <div class="field-row">
+              <input type="number" step="0.01" value="${e.iibb ?? 0}" onchange="updateEntity('${e.id}','iibb',this.value)" ${e.iibbAplica === false ? 'disabled class="disabled"' : ''}>
+              <button class="aplica-toggle ${e.iibbAplica === false ? 'off' : 'on'}" onclick="toggleAplica('${e.id}','iibb')" title="${e.iibbAplica === false ? 'No aplica · click para activar' : 'Aplica · click para desactivar'}">${e.iibbAplica === false ? '✕' : '✓'}</button>
+            </div>
+          </div>
+          <div class="field" title="Imp. Débitos &amp; Créditos: (capital − costos previos) × %. Bancos: 0,6%. ALYC vía MM: exento (0%).">
+            <label>Imp.D&amp;C %</label>
+            <div class="field-row">
+              <input type="number" step="0.001" value="${e.dc ?? 0}" onchange="updateEntity('${e.id}','dc',this.value)" ${e.dcAplica === false ? 'disabled class="disabled"' : ''}>
+              <button class="aplica-toggle ${e.dcAplica === false ? 'off' : 'on'}" onclick="toggleAplica('${e.id}','dc')" title="${e.dcAplica === false ? 'No aplica · click para activar' : 'Aplica · click para desactivar'}">${e.dcAplica === false ? '✕' : '✓'}</button>
+            </div>
+          </div>
+          <div class="field" title="Derechos de mercado MAV/BYMA: capital × % × días/365. ALYC: 0,06%. Banco: 0%.">
+            <label>Derechos %</label>
+            <div class="field-row">
+              <input type="number" step="0.001" value="${e.derechos ?? 0}" onchange="updateEntity('${e.id}','derechos',this.value)" ${e.derechosAplica === false ? 'disabled class="disabled"' : ''}>
+              <button class="aplica-toggle ${e.derechosAplica === false ? 'off' : 'on'}" onclick="toggleAplica('${e.id}','derechos')" title="${e.derechosAplica === false ? 'No aplica · click para activar' : 'Aplica · click para desactivar'}">${e.derechosAplica === false ? '✕' : '✓'}</button>
+            </div>
+          </div>
+          <div class="field" title="Comisión MCI sobre capital (default 0%)">
+            <label>MCI %</label>
+            <div class="field-row">
+              <input type="number" step="0.01" value="${e.mci ?? 0}" onchange="updateEntity('${e.id}','mci',this.value)" ${e.mciAplica === false ? 'disabled class="disabled"' : ''}>
+              <button class="aplica-toggle ${e.mciAplica === false ? 'off' : 'on'}" onclick="toggleAplica('${e.id}','mci')" title="${e.mciAplica === false ? 'No aplica · click para activar' : 'Aplica · click para desactivar'}">${e.mciAplica === false ? '✕' : '✓'}</button>
+            </div>
+          </div>
+          <div class="spacer"></div>
+          <div class="totals">
+            <div class="item"><span class="label">Capital</span><span class="value">$ ${fmt(t.totCapital)}</span></div>
+            <div class="item"><span class="label">NETO</span><span class="value">$ ${fmt(t.totNeto)}</span></div>
+            <div class="item"><span class="label">TNA Efectiva</span><span class="value cft">${fmtPct(t.tnaEfectivaPond)}</span></div>
+          </div>
+          ${state.syncedMode ? '' : `<button class="ghost" onclick="copyChecksFrom('${e.id}')">Copiar cheques</button>`}
+          <button class="danger" onclick="removeEntity('${e.id}')">Eliminar</button>
+        </div>
+        <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th class="left" title="Dueño / contraparte / librador">Dueño</th>
+              <th class="left">F. Inicial</th>
+              <th class="left">F. Cheque</th>
+              <th>Capital</th>
+              <th>Días</th>
+              <th title="Capital × TNA × días/365">Intereses</th>
+              <th title="Capital × Sellos% × días/365 — solo bancos">Sellos<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--gray-500)">${effectiveRate(e,'sellos')}%</span></th>
+              <th title="(Intereses + Sellos + Derechos) × IVA% — solo bancos">IVA<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--gray-500)">${effectiveRate(e,'iva')}%</span></th>
+              <th title="(Intereses + Sellos + Derechos) × IIBB%">IIBB<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--gray-500)">${effectiveRate(e,'iibb')}%</span></th>
+              <th title="(Capital − costos previos) × D&C% — bancos y ALYC sin MM">Imp.D&amp;C<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--gray-500)">${effectiveRate(e,'dc')}%</span></th>
+              <th title="Capital × Derechos% × días/365 — ALYC/MAV">Derechos<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--gray-500)">${effectiveRate(e,'derechos')}%</span></th>
+              <th title="Capital × MCI%">MCI<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--accent)">${effectiveRate(e,'mci')}%</span></th>
+              <th>NETO</th>
+              <th title="${isAllIn(e) ? 'All in: tasa que incluye todos los costos del mercado' : 'TNA cotizada — editable por cheque'}">${tnaLabel(e)}<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--navy)">${isAllIn(e) ? 'all in' : 'base'}</span></th>
+              <th title="TNA Efectiva = (costo total / NETO) × (365/días). Incluye todos los impuestos y comisiones. Fórmula del comparador MCI.">TNA Ef.<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--green)">real</span></th>
+              <th title="Spread = TNA Efectiva − TNA cotizada">TNA Ef.−${tnaLabel(e)}<br><span style="font-size:9px;font-weight:500;text-transform:none;color:var(--amber)">costo extra</span></th>
+              <th class="center"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${e.checks.map(c => {
+              const r = calcRow(c, e.tna,
+                effectiveRate(e,'iva'), effectiveRate(e,'iibb'),
+                effectiveRate(e,'sellos'), effectiveRate(e,'dc'),
+                effectiveRate(e,'derechos'), effectiveRate(e,'mci'));
+              const tefVal = r.tnaEfectiva;
+              const tefClass = !isFinite(tefVal) ? 'cft' : tefVal > 0.80 ? 'cft high' : 'cft';
+              const tnaDec = (r.effectiveTnaPct || 0) / 100;
+              const spread = isFinite(tefVal) ? tefVal - tnaDec : NaN;
+              const spreadClass = spread > 0.20 ? 'spread high' : 'spread';
+              return `
+                <tr>
+                  <td><input type="text" placeholder="Contraparte" value="${(c.dueno || '').replace(/"/g, '&quot;')}" onchange="updateCheck('${e.id}','${c.id}','dueno',this.value)" style="text-align:left;min-width:80px;max-width:110px;font-size:11px;padding:3px 5px"></td>
+                  <td><input type="date" value="${c.fechaInicial}" onchange="updateCheck('${e.id}','${c.id}','fechaInicial',this.value)"></td>
+                  <td><input type="date" value="${c.fechaCheque}" onchange="updateCheck('${e.id}','${c.id}','fechaCheque',this.value)"></td>
+                  <td><input type="text" inputmode="numeric" value="${fmtCapital(c.capital)}" onchange="updateCheck('${e.id}','${c.id}','capital',parseCapital(this.value))" style="text-align:right;font-weight:600"></td>
+                  <td class="calc">${r.dias}</td>
+                  <td class="calc">${fmt(r.intereses)}</td>
+                  <td class="calc">${fmt(r.sellos)}</td>
+                  <td class="calc">${fmt(r.iva)}</td>
+                  <td class="calc">${fmt(r.iibb)}</td>
+                  <td class="calc">${fmt(r.dc)}</td>
+                  <td class="calc">${fmt(r.derechos)}</td>
+                  <td class="calc">${fmt(r.mci)}</td>
+                  <td class="neto">${fmt(r.neto)}</td>
+                  <td class="tna" style="padding:2px 4px"><input type="number" step="0.01" value="${r.effectiveTnaPct}" onchange="updateCheck('${e.id}','${c.id}','tna',this.value)" title="TNA específica del cheque (override). Vaciar para usar la TNA de la entidad (${e.tna}%)." style="width:48px;text-align:right;padding:3px 5px;font-size:11px;font-weight:700;background:${r.hasOverride ? '#fef3c7' : 'transparent'};border:1px solid ${r.hasOverride ? 'var(--amber)' : 'transparent'};border-radius:3px;color:var(--navy)"></td>
+                  <td class="${tefClass}">${fmtPct(tefVal)}</td>
+                  <td class="${spreadClass}">${isFinite(spread) ? (spread>=0?'+':'') + fmtPct(spread) : '—'}</td>
+                  <td class="center" style="white-space:nowrap">
+                    <button onclick="duplicateCheck('${e.id}','${c.id}')" title="Duplicar fila" style="padding:3px 7px;font-size:10px;background:var(--navy-soft);color:var(--navy);border:1px solid var(--navy);border-radius:4px;font-weight:600;cursor:pointer;margin-right:3px">Dup</button>
+                    <button class="danger" onclick="removeCheck('${e.id}','${c.id}')" title="Eliminar${state.syncedMode ? ' (todos los escenarios)' : ''}" style="padding:2px 5px;font-size:13px;line-height:1">🗑</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td class="label" colspan="3">TOTALES</td>
+              <td>${fmt(t.totCapital)}</td>
+              <td>—</td>
+              <td>${fmt(t.totIntereses)}</td>
+              <td>${fmt(t.totSellos)}</td>
+              <td>${fmt(t.totIVA)}</td>
+              <td>${fmt(t.totIIBB)}</td>
+              <td>${fmt(t.totDC)}</td>
+              <td>${fmt(t.totDerechos)}</td>
+              <td>${fmt(t.totMCI)}</td>
+              <td>${fmt(t.totNeto)}</td>
+              <td title="${t.hasAnyOverride ? 'TNA ponderada por capital' : 'TNA de la entidad'}">${fmtPct((t.tnaPond || 0) / 100)}${t.hasAnyOverride ? ' <span style="font-size:9px;color:var(--amber);font-weight:600">pond.</span>' : ''}</td>
+              <td>${fmtPct(t.tnaEfectivaPond)}</td>
+              <td>${isFinite(t.tnaEfectivaPond) ? (t.tnaEfectivaPond - (t.tnaPond||0)/100 >= 0 ? '+' : '') + fmtPct(t.tnaEfectivaPond - (t.tnaPond||0)/100) : '—'}</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        </div>
+        <div class="add-row">
+          <span class="hint">Tip: doble clic en cualquier celda para editarla. Los cálculos se actualizan al instante.</span>
+          <button class="primary" onclick="addCheck('${e.id}')">+ Agregar Cheque</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+render();
+</script>
+
+</body>
+</html>
